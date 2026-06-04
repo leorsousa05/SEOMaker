@@ -1,2 +1,5 @@
 /config/database.sqlite
 /tmp/
+/node_modules/
+/package*.json
+

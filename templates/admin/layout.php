@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - <?= htmlspecialchars(App\Core\Config::get('site_title', 'SEO Template')) ?></title>
     <link rel="stylesheet" href="/assets/admin.css">
+    <script src="/assets/tabs.js" defer></script>
 </head>
 <body class="admin">
     <aside class="sidebar">

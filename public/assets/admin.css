@@ -272,6 +272,56 @@ body {
     background: var(--gray-50);
 }
 
+/* Tabs */
+.tabs-nav {
+    display: flex;
+    gap: 0.25rem;
+    border-bottom: 2px solid var(--gray-200);
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+}
+
+.tabs-nav-item {
+    padding: 0.625rem 1.25rem;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-600);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.tabs-nav-item:hover {
+    color: var(--gray-900);
+}
+
+.tabs-nav-item.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+.tabs-panel {
+    display: none;
+}
+
+.tabs-panel.active {
+    display: block;
+    animation: tabFadeIn 0.2s ease;
+}
+
+@keyframes tabFadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.tabs-form {
+    padding-top: 0;
+}
+
 /* Alerts */
 .alert {
     padding: 0.75rem 1rem;
