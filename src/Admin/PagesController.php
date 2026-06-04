@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Admin;
 
+use App\Content\BlockEditor;
 use App\Core\Database;
 use App\Core\View;
-use App\Models\Page;
+use App\Models\Address;
+use App\Seo\LocalBusinessSchema;
 use App\Seo\SchemaFormBuilder;
 
 class PagesController
@@ -32,10 +34,33 @@ class PagesController
         
         $schemaTypes = SchemaFormBuilder::types();
         
+        // Load address if page has one
+        $address = null;
+        if ($page && !empty($page['address_id'])) {
+            $addrData = Database::fetchOne('SELECT * FROM addresses WHERE id = ?', [$page['address_id']]);
+            if ($addrData) {
+                $address = Address::fromArray($addrData);
+            }
+        }
+        
+        // Parse content blocks
+        $contentBlocks = [];
+        if ($page && !empty($page['content_blocks'])) {
+            $decoded = json_decode($page['content_blocks'], true);
+            if (is_array($decoded)) {
+                $contentBlocks = $decoded;
+            }
+        }
+        if (empty($contentBlocks)) {
+            $contentBlocks = BlockEditor::defaultBlocks();
+        }
+        
         View::layout('admin/layout');
         echo View::render('admin/pages_edit', [
             'page' => $page,
             'schemaTypes' => $schemaTypes,
+            'address' => $address,
+            'contentBlocks' => $contentBlocks,
         ]);
     }
     
@@ -62,12 +87,23 @@ class PagesController
             }
         }
         
+        // Build content blocks from editor
+        $contentBlocks = $_POST['content_blocks'] ?? '';
+        $contentHtml = '';
+        if ($contentBlocks) {
+            $blocks = json_decode($contentBlocks, true);
+            if (is_array($blocks)) {
+                $contentHtml = BlockEditor::render($blocks);
+            }
+        }
+        
         $data = [
             'slug' => $_POST['slug'] ?? '',
             'title' => $_POST['title'] ?? '',
             'meta_title' => $_POST['meta_title'] ?? '',
             'meta_description' => $_POST['meta_description'] ?? '',
-            'content_html' => $_POST['content_html'] ?? '',
+            'content_html' => $contentHtml,
+            'content_blocks' => $contentBlocks,
             'schema_type' => $schemaType,
             'schema_data' => $schemaData,
             'is_active' => isset($_POST['is_active']) ? 1 : 0,
@@ -76,11 +112,42 @@ class PagesController
         
         if ($id > 0) {
             Database::update('pages', $data, 'id = ?', [$id]);
+            $pageId = $id;
             $_SESSION['flash'] = 'Página atualizada com sucesso!';
         } else {
             $data['created_at'] = date('Y-m-d H:i:s');
-            Database::insert('pages', $data);
+            $pageId = Database::insert('pages', $data);
             $_SESSION['flash'] = 'Página criada com sucesso!';
+        }
+        
+        // Save/update address
+        if (isset($_POST['address_street']) && $_POST['address_street'] !== '') {
+            $addrData = [
+                'street' => $_POST['address_street'] ?? '',
+                'number' => $_POST['address_number'] ?? '',
+                'complement' => $_POST['address_complement'] ?? '',
+                'neighborhood' => $_POST['address_neighborhood'] ?? '',
+                'city' => $_POST['address_city'] ?? '',
+                'state' => $_POST['address_state'] ?? '',
+                'zip' => $_POST['address_zip'] ?? '',
+                'country' => $_POST['address_country'] ?? 'Brasil',
+                'lat' => $_POST['address_lat'] ?? null,
+                'lng' => $_POST['address_lng'] ?? null,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ];
+            
+            $existingAddr = Database::fetchOne('SELECT id FROM addresses WHERE page_id = ?', [$pageId]);
+            if ($existingAddr) {
+                Database::update('addresses', $addrData, 'id = ?', [$existingAddr['id']]);
+                $addressId = (int) $existingAddr['id'];
+            } else {
+                $addrData['page_id'] = $pageId;
+                $addrData['created_at'] = date('Y-m-d H:i:s');
+                $addressId = Database::insert('addresses', $addrData);
+            }
+            
+            // Update page address_id
+            Database::update('pages', ['address_id' => $addressId], 'id = ?', [$pageId]);
         }
         
         header('Location: /admin/pages');
@@ -93,6 +160,8 @@ class PagesController
         
         $id = isset($params['id']) ? (int) $params['id'] : 0;
         if ($id > 0) {
+            // Delete associated address
+            Database::delete('addresses', 'page_id = ?', [$id]);
             Database::delete('pages', 'id = ?', [$id]);
             $_SESSION['flash'] = 'Página removida com sucesso!';
         }

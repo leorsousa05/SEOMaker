@@ -44,6 +44,51 @@ class Seeder
             )
         ');
         
+        $db->exec('
+            CREATE TABLE IF NOT EXISTS addresses (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                page_id INTEGER,
+                street TEXT,
+                number TEXT,
+                complement TEXT,
+                neighborhood TEXT,
+                city TEXT,
+                state TEXT,
+                zip TEXT,
+                country TEXT DEFAULT "Brasil",
+                lat TEXT,
+                lng TEXT,
+                created_at TEXT,
+                updated_at TEXT
+            )
+        ');
+        
+        $db->exec('
+            CREATE TABLE IF NOT EXISTS media (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                filename TEXT NOT NULL,
+                original_name TEXT,
+                mime_type TEXT,
+                size_bytes INTEGER DEFAULT 0,
+                width INTEGER,
+                height INTEGER,
+                path TEXT NOT NULL,
+                created_at TEXT
+            )
+        ');
+        
+        // Migrate pages table if needed (add content_blocks column)
+        try {
+            $db->exec('ALTER TABLE pages ADD COLUMN content_blocks TEXT');
+        } catch (\PDOException $e) {
+            // Column already exists
+        }
+        try {
+            $db->exec('ALTER TABLE pages ADD COLUMN address_id INTEGER');
+        } catch (\PDOException $e) {
+            // Column already exists
+        }
+        
         // Seed default admin
         $existing = Database::fetchOne('SELECT 1 FROM users WHERE username = ?', ['admin']);
         if (!$existing) {

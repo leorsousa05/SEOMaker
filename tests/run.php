@@ -6,6 +6,10 @@ echo "=== PHP Tests ===\n";
 require __DIR__ . '/php/SettingsControllerTest.php';
 echo "\n";
 require __DIR__ . '/php/SchemaFormBuilderTest.php';
+echo "\n";
+require __DIR__ . '/php/BlockEditorTest.php';
+echo "\n";
+require __DIR__ . '/php/LocalBusinessSchemaTest.php';
 
 echo "\n=== JS Tests ===\n";
 if (shell_exec('which node')) {
