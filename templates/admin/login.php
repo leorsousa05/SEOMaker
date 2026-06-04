@@ -8,7 +8,7 @@
 </head>
 <body class="login-page">
     <div class="login-box">
-        <div class="sidebar-brand-icon" style="margin: 0 auto 1rem; width: 48px; height: 48px; font-size: 1.5rem;">S</div>
+        <div class="login-logo">S</div>
         <h1>SEO Template</h1>
         <p class="subtitle">Painel de administração</p>
         <?php if (!empty($error)): ?>
