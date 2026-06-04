@@ -95,9 +95,15 @@ class Seeder
             ]);
         }
         
-        // Seed about page
-        $existingAbout = Database::fetchOne("SELECT 1 FROM pages WHERE slug = 'sobre'");
-        if (!$existingAbout) {
+        // Seed about page (only on first run ever)
+        $seederRan = Database::fetchOne("SELECT value FROM settings WHERE key = 'seeder_ran'");
+        if (!$seederRan) {
+            Database::insert('settings', [
+                'key' => 'seeder_ran',
+                'value' => '1',
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+            
             Database::insert('pages', [
                 'slug' => 'sobre',
                 'title' => 'Sobre Nós',
