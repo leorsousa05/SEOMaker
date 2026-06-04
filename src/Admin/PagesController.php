@@ -7,6 +7,7 @@ namespace App\Admin;
 use App\Core\Database;
 use App\Core\View;
 use App\Models\Page;
+use App\Seo\SchemaFormBuilder;
 
 class PagesController
 {
@@ -29,7 +30,7 @@ class PagesController
         $id = isset($params['id']) ? (int) $params['id'] : 0;
         $page = $id > 0 ? Database::fetchOne('SELECT * FROM pages WHERE id = ?', [$id]) : null;
         
-        $schemaTypes = ['WebPage', 'WebSite', 'Organization', 'ContactPage', 'AboutPage', 'Service'];
+        $schemaTypes = SchemaFormBuilder::types();
         
         View::layout('admin/layout');
         echo View::render('admin/pages_edit', [
@@ -43,6 +44,23 @@ class PagesController
         AuthController::requireAuth();
         
         $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+        $schemaType = $_POST['schema_type'] ?? 'WebPage';
+        
+        // Build schema JSON from form fields if present
+        $schemaData = $_POST['schema_data'] ?? '{}';
+        $fields = SchemaFormBuilder::fieldsForType($schemaType);
+        if (!empty($fields)) {
+            $hasSchemaFields = false;
+            foreach ($fields as $field) {
+                if (isset($_POST[$field['name']]) && $_POST[$field['name']] !== '') {
+                    $hasSchemaFields = true;
+                    break;
+                }
+            }
+            if ($hasSchemaFields) {
+                $schemaData = SchemaFormBuilder::buildJson($_POST, $schemaType);
+            }
+        }
         
         $data = [
             'slug' => $_POST['slug'] ?? '',
@@ -50,8 +68,8 @@ class PagesController
             'meta_title' => $_POST['meta_title'] ?? '',
             'meta_description' => $_POST['meta_description'] ?? '',
             'content_html' => $_POST['content_html'] ?? '',
-            'schema_type' => $_POST['schema_type'] ?? 'WebPage',
-            'schema_data' => $_POST['schema_data'] ?? '{}',
+            'schema_type' => $schemaType,
+            'schema_data' => $schemaData,
             'is_active' => isset($_POST['is_active']) ? 1 : 0,
             'updated_at' => date('Y-m-d H:i:s'),
         ];
