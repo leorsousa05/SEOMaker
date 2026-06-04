@@ -101,6 +101,23 @@ foreach ($schemaTypes as $type) {
     </form>
 </div>
 
+<!-- Media Selection Modal -->
+<div class="modal-overlay" id="media-modal-overlay" style="display:none;">
+    <div class="modal media-modal">
+        <div class="modal-header">
+            <h3>Escolher Imagem da Galeria</h3>
+            <button type="button" class="modal-close" id="media-modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="media-modal-grid" id="media-modal-grid"></div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn" id="media-modal-cancel">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="media-modal-confirm">Usar Imagem Selecionada</button>
+        </div>
+    </div>
+</div>
+
 <script>
 window.schemaFieldDefs = <?= json_encode($fieldDefs) ?>;
 </script>

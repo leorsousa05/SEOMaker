@@ -178,6 +178,77 @@
                 syncHiddenInput();
             });
         });
+
+        // Image gallery button
+        container.querySelectorAll('.be-image-gallery').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var idx = parseInt(btn.dataset.index);
+                openMediaModal(function (url) {
+                    blocks[idx].src = url;
+                    var input = editor.querySelector('.be-image-src[data-index="' + idx + '"]');
+                    if (input) input.value = url;
+                    syncHiddenInput();
+                });
+            });
+        });
+    }
+
+    function openMediaModal(callback) {
+        var overlay = document.getElementById('media-modal-overlay');
+        var grid = document.getElementById('media-modal-grid');
+        if (!overlay || !grid) {
+            // Fallback: simple prompt
+            var url = prompt('URL da imagem:');
+            if (url) callback(url);
+            return;
+        }
+
+        overlay.style.display = 'flex';
+        grid.innerHTML = '<p>Carregando...</p>';
+
+        fetch('/admin/media/json')
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (!data.success || !data.items || data.items.length === 0) {
+                    grid.innerHTML = '<p>Nenhuma imagem na galeria.</p>';
+                    return;
+                }
+                var html = '';
+                data.items.forEach(function (item) {
+                    html += '<div class="media-modal-item" data-url="' + escapeHtml(item.path) + '">';
+                    html += '<img src="' + escapeHtml(item.path) + '" alt="" loading="lazy">';
+                    html += '<div class="media-modal-select">✓</div>';
+                    html += '</div>';
+                });
+                grid.innerHTML = html;
+
+                var selectedUrl = null;
+                grid.querySelectorAll('.media-modal-item').forEach(function (item) {
+                    item.addEventListener('click', function () {
+                        grid.querySelectorAll('.media-modal-item').forEach(function (i) { i.classList.remove('selected'); });
+                        item.classList.add('selected');
+                        selectedUrl = item.dataset.url;
+                    });
+                });
+
+                document.getElementById('media-modal-confirm').onclick = function () {
+                    overlay.style.display = 'none';
+                    if (selectedUrl) callback(selectedUrl);
+                };
+            })
+            .catch(function () {
+                grid.innerHTML = '<p>Erro ao carregar galeria.</p>';
+            });
+
+        document.getElementById('media-modal-cancel').onclick = function () {
+            overlay.style.display = 'none';
+        };
+        document.getElementById('media-modal-close').onclick = function () {
+            overlay.style.display = 'none';
+        };
+        overlay.onclick = function (e) {
+            if (e.target === overlay) overlay.style.display = 'none';
+        };
     }
 
     function renderBlockItem(block, i) {
@@ -203,7 +274,10 @@
                 html += '</div>';
                 break;
             case 'image':
-                html += '<input type="text" class="be-input" data-index="' + i + '" data-prop="src" value="' + escapeHtml(block.src || '') + '" placeholder="URL da imagem">';
+                html += '<div class="be-image-row">';
+                html += '<input type="text" class="be-input be-image-src" data-index="' + i + '" data-prop="src" value="' + escapeHtml(block.src || '') + '" placeholder="URL da imagem">';
+                html += '<button type="button" class="be-btn be-image-gallery" data-index="' + i + '">📁 Galeria</button>';
+                html += '</div>';
                 html += '<input type="text" class="be-input" data-index="' + i + '" data-prop="alt" value="' + escapeHtml(block.alt || '') + '" placeholder="Descrição da imagem (alt)">';
                 html += '<input type="text" class="be-input" data-index="' + i + '" data-prop="caption" value="' + escapeHtml(block.caption || '') + '" placeholder="Legenda">';
                 html += '<select class="be-input" data-index="' + i + '" data-prop="align">';

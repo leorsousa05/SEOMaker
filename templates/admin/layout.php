@@ -15,6 +15,7 @@
         <nav class="sidebar-nav">
             <a href="/admin">Dashboard</a>
             <a href="/admin/pages">Páginas</a>
+            <a href="/admin/media">Galeria</a>
             <a href="/admin/settings">Configurações</a>
             <a href="/admin/logout" class="logout">Sair</a>
         </nav>

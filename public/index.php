@@ -10,6 +10,7 @@ use App\Core\Router;
 use App\Admin\AuthController;
 use App\Admin\DashboardController;
 use App\Admin\SettingsController;
+use App\Admin\MediaController;
 use App\Admin\PagesController;
 use App\Public\SiteController;
 
@@ -36,6 +37,10 @@ $router->get('/admin/pages/edit', [PagesController::class, 'edit']);
 $router->get('/admin/pages/edit/{id}', [PagesController::class, 'edit']);
 $router->post('/admin/pages/save', [PagesController::class, 'save']);
 $router->get('/admin/pages/delete/{id}', [PagesController::class, 'delete']);
+$router->get('/admin/media', [MediaController::class, 'index']);
+$router->post('/admin/media/upload', [MediaController::class, 'upload']);
+$router->get('/admin/media/delete/{id}', [MediaController::class, 'delete']);
+$router->get('/admin/media/json', [MediaController::class, 'json']);
 
 // Error handlers
 $router->setNotFoundHandler(function () {
