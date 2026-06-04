@@ -32,6 +32,8 @@ class MediaController
             'total' => $total,
             'totalPages' => $totalPages,
             'flash' => $flash,
+            'pageTitle' => 'Galeria de Mídia',
+            'activeNav' => 'media',
         ]);
     }
     

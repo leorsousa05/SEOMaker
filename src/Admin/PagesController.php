@@ -22,7 +22,12 @@ class PagesController
         unset($_SESSION['flash']);
         
         View::layout('admin/layout');
-        echo View::render('admin/pages', ['pages' => $pages, 'flash' => $flash]);
+        echo View::render('admin/pages', [
+            'pages' => $pages,
+            'flash' => $flash,
+            'pageTitle' => 'Páginas',
+            'activeNav' => 'pages',
+        ]);
     }
     
     public function edit(array $params): void
@@ -61,6 +66,9 @@ class PagesController
             'schemaTypes' => $schemaTypes,
             'address' => $address,
             'contentBlocks' => $contentBlocks,
+            'pageTitle' => $isEdit ? 'Editar Página' : 'Nova Página',
+            'activeNav' => 'pages',
+            'headerActions' => '<a href="/admin/pages" class="btn btn-ghost">← Voltar</a>',
         ]);
     }
     

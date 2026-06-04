@@ -7,10 +7,6 @@
 /** @var string|null $flash */
 ?>
 
-<div class="page-header">
-    <h1>Galeria de Mídia</h1>
-</div>
-
 <?php if ($flash): ?>
     <div class="alert alert-success"><?= htmlspecialchars($flash) ?></div>
 <?php endif; ?>
@@ -32,6 +28,7 @@
 <!-- Media Grid -->
 <?php if (empty($items)): ?>
     <div class="empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem; opacity: 0.5;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
         <p>Nenhuma imagem ainda.</p>
         <p class="empty-state-hint">Arraste imagens acima para começar.</p>
     </div>
@@ -62,11 +59,15 @@
     <?php if ($totalPages > 1): ?>
         <div class="pagination">
             <?php if ($page > 1): ?>
-                <a href="?page=<?= $page - 1 ?>" class="btn">← Anterior</a>
+                <a href="?page=<?= $page - 1 ?>" class="btn btn-ghost">← Anterior</a>
+            <?php else: ?>
+                <span></span>
             <?php endif; ?>
             <span class="pagination-info">Página <?= $page ?> de <?= $totalPages ?> (<?= $total ?> imagens)</span>
             <?php if ($page < $totalPages): ?>
-                <a href="?page=<?= $page + 1 ?>" class="btn">Próxima →</a>
+                <a href="?page=<?= $page + 1 ?>" class="btn btn-ghost">Próxima →</a>
+            <?php else: ?>
+                <span></span>
             <?php endif; ?>
         </div>
     <?php endif; ?>

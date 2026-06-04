@@ -99,6 +99,8 @@ class SettingsController
             'groups' => $this->groups,
             'activeTab' => $activeTab,
             'labels' => $this->labels,
+            'pageTitle' => 'Configurações',
+            'activeNav' => 'settings',
         ]);
     }
 }

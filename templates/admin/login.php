@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Admin</title>
+    <title>Login — Admin</title>
     <link rel="stylesheet" href="/assets/admin.css">
 </head>
 <body class="login-page">
     <div class="login-box">
-        <h1>Admin</h1>
+        <div class="sidebar-brand-icon" style="margin: 0 auto 1rem; width: 48px; height: 48px; font-size: 1.5rem;">S</div>
+        <h1>SEO Template</h1>
+        <p class="subtitle">Painel de administração</p>
         <?php if (!empty($error)): ?>
             <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
@@ -21,7 +23,7 @@
                 <label for="password">Senha</label>
                 <input type="password" id="password" name="password" required>
             </div>
-            <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Entrar</button>
         </form>
         <p class="hint">Usuário padrão: admin / admin123</p>
     </div>

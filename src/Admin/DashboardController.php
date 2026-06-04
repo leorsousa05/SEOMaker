@@ -20,6 +20,10 @@ class DashboardController
         ];
         
         View::layout('admin/layout');
-        echo View::render('admin/dashboard', ['stats' => $stats]);
+        echo View::render('admin/dashboard', [
+            'stats' => $stats,
+            'pageTitle' => 'Dashboard',
+            'activeNav' => 'dashboard',
+        ]);
     }
 }

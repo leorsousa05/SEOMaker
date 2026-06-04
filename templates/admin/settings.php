@@ -33,10 +33,6 @@ $helperTexts = [
 ];
 ?>
 
-<div class="page-header">
-    <h1>Configurações do Site</h1>
-</div>
-
 <?php if ($flash): ?>
     <div class="alert alert-success"><?= htmlspecialchars($flash) ?></div>
 <?php endif; ?>
@@ -55,30 +51,36 @@ $helperTexts = [
         
         <?php foreach ($groups as $key => $group): ?>
             <div class="tabs-panel <?= $key === $activeTab ? 'active' : '' ?>" data-tab="<?= $key ?>">
-                <?php foreach ($group['keys'] as $fieldKey): ?>
-                    <div class="form-group">
-                        <label for="<?= $fieldKey ?>"><?= htmlspecialchars($labels[$fieldKey] ?? $fieldKey) ?></label>
-                        <?php if (str_contains($fieldKey, '_description') || str_contains($fieldKey, '_custom') || str_contains($fieldKey, '_address')): ?>
-                            <textarea id="<?= $fieldKey ?>" name="<?= $fieldKey ?>" rows="3"><?= htmlspecialchars($settings[$fieldKey] ?? '') ?></textarea>
-                        <?php elseif (str_contains($fieldKey, '_pass')): ?>
-                            <input type="password" id="<?= $fieldKey ?>" name="<?= $fieldKey ?>" value="<?= htmlspecialchars($settings[$fieldKey] ?? '') ?>">
-                        <?php elseif (str_contains($fieldKey, 'site_url')): ?>
-                            <input type="url" id="<?= $fieldKey ?>" name="<?= $fieldKey ?>" value="<?= htmlspecialchars($settings[$fieldKey] ?? '') ?>">
-                        <?php elseif (str_contains($fieldKey, 'email')): ?>
-                            <input type="email" id="<?= $fieldKey ?>" name="<?= $fieldKey ?>" value="<?= htmlspecialchars($settings[$fieldKey] ?? '') ?>">
-                        <?php elseif (str_contains($fieldKey, 'phone') || str_contains($fieldKey, 'port')): ?>
-                            <input type="tel" id="<?= $fieldKey ?>" name="<?= $fieldKey ?>" value="<?= htmlspecialchars($settings[$fieldKey] ?? '') ?>">
-                        <?php else: ?>
-                            <input type="text" id="<?= $fieldKey ?>" name="<?= $fieldKey ?>" value="<?= htmlspecialchars($settings[$fieldKey] ?? '') ?>">
-                        <?php endif; ?>
-                        <?php if (isset($helperTexts[$fieldKey])): ?>
-                            <span class="help-text"><?= htmlspecialchars($helperTexts[$fieldKey]) ?></span>
-                        <?php endif; ?>
+                <div class="card">
+                    <div class="card-body">
+                        <?php foreach ($group['keys'] as $fieldKey): ?>
+                            <div class="form-group">
+                                <label for="<?= $fieldKey ?>"><?= htmlspecialchars($labels[$fieldKey] ?? $fieldKey) ?></label>
+                                <?php if (str_contains($fieldKey, '_description') || str_contains($fieldKey, '_custom') || str_contains($fieldKey, '_address')): ?>
+                                    <textarea id="<?= $fieldKey ?>" name="<?= $fieldKey ?>" rows="3"><?= htmlspecialchars($settings[$fieldKey] ?? '') ?></textarea>
+                                <?php elseif (str_contains($fieldKey, '_pass')): ?>
+                                    <input type="password" id="<?= $fieldKey ?>" name="<?= $fieldKey ?>" value="<?= htmlspecialchars($settings[$fieldKey] ?? '') ?>">
+                                <?php elseif (str_contains($fieldKey, 'site_url')): ?>
+                                    <input type="url" id="<?= $fieldKey ?>" name="<?= $fieldKey ?>" value="<?= htmlspecialchars($settings[$fieldKey] ?? '') ?>">
+                                <?php elseif (str_contains($fieldKey, 'email')): ?>
+                                    <input type="email" id="<?= $fieldKey ?>" name="<?= $fieldKey ?>" value="<?= htmlspecialchars($settings[$fieldKey] ?? '') ?>">
+                                <?php elseif (str_contains($fieldKey, 'phone') || str_contains($fieldKey, 'port')): ?>
+                                    <input type="tel" id="<?= $fieldKey ?>" name="<?= $fieldKey ?>" value="<?= htmlspecialchars($settings[$fieldKey] ?? '') ?>">
+                                <?php else: ?>
+                                    <input type="text" id="<?= $fieldKey ?>" name="<?= $fieldKey ?>" value="<?= htmlspecialchars($settings[$fieldKey] ?? '') ?>">
+                                <?php endif; ?>
+                                <?php if (isset($helperTexts[$fieldKey])): ?>
+                                    <span class="help-text"><?= htmlspecialchars($helperTexts[$fieldKey]) ?></span>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
-                <?php endforeach; ?>
+                </div>
             </div>
         <?php endforeach; ?>
         
-        <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+        <div style="margin-top: 1.5rem;">
+            <button type="submit" class="btn btn-primary btn-lg">Salvar Configurações</button>
+        </div>
     </form>
 </div>

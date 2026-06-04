@@ -39,6 +39,7 @@ class View
                 throw new \RuntimeException("Layout not found: " . self::$layout);
             }
             $content = self::$content;
+            extract(array_merge(self::$shared, $data));
             ob_start();
             require $layoutPath;
             return ob_get_clean();
