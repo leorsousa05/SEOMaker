@@ -2,7 +2,7 @@ id: 008-breadcrumb-redirect
 title: BreadcrumbList Schema e Redirects 301
 author: agent
 part: 6
-status: active
+status: completed
 dependencies:
   - 007-seo-canonical-twitter-slug
 tests: true
