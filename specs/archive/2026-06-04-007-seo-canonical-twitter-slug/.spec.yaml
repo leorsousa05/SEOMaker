@@ -2,7 +2,7 @@ id: 007-seo-canonical-twitter-slug
 title: Canonical URL, Twitter Cards e Slug Automático
 author: agent
 part: 5
-status: active
+status: completed
 dependencies:
   - 006-sitemap-contact-email
 tests: true
