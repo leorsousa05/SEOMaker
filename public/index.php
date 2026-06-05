@@ -8,6 +8,7 @@ require_once __DIR__ . '/../src/autoload.php';
 
 use App\Core\Router;
 use App\Admin\AuthController;
+use App\Admin\ContactMessagesController;
 use App\Admin\DashboardController;
 use App\Admin\SettingsController;
 use App\Admin\MediaController;
@@ -41,6 +42,10 @@ $router->get('/admin/media', [MediaController::class, 'index']);
 $router->post('/admin/media/upload', [MediaController::class, 'upload']);
 $router->get('/admin/media/delete/{id}', [MediaController::class, 'delete']);
 $router->get('/admin/media/json', [MediaController::class, 'json']);
+$router->get('/admin/messages', [ContactMessagesController::class, 'index']);
+$router->get('/admin/messages/reply/{id}', [ContactMessagesController::class, 'reply']);
+$router->get('/admin/messages/archive/{id}', [ContactMessagesController::class, 'archive']);
+$router->get('/admin/messages/delete/{id}', [ContactMessagesController::class, 'delete']);
 
 // Error handlers
 $router->setNotFoundHandler(function () {

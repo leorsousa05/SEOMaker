@@ -1,0 +1,13 @@
+{
+    "name": "seo/template",
+    "description": "SEO Template PHP",
+    "type": "project",
+    "require": {
+        "phpmailer/phpmailer": "^6.9"
+    },
+    "authors": [
+        {
+            "name": "Admin"
+        }
+    ]
+}

@@ -18,6 +18,7 @@
     }
     ?>
     <link rel="stylesheet" href="/assets/style.css">
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml">
 </head>
 <body>
     <nav class="navbar">

@@ -8,8 +8,9 @@ use App\Core\Config;
 use App\Core\Database;
 use App\Core\Mailer;
 use App\Core\View;
+use App\Models\ContactMessage;
 use App\Models\Page;
-use App\Seo\SeoManager;
+use App\Seo\RobotsBuilder;
 use App\Seo\SitemapGenerator;
 
 class SiteController
@@ -36,7 +37,7 @@ class SiteController
         if (!$pageData) {
             http_response_code(404);
             View::layout('public/layout');
-            echo View::render('public/404');
+            echo \App\Core\View::render('public/404');
             return;
         }
         
@@ -48,53 +49,58 @@ class SiteController
     
     public function sitemap(): void
     {
-        header('Content-Type: application/xml');
+        header('Content-Type: application/xml; charset=utf-8');
         echo SitemapGenerator::generate();
     }
     
     public function robots(): void
     {
-        header('Content-Type: text/plain');
-        $siteUrl = rtrim(Config::get('site_url', 'https://example.com'), '/');
-        echo "User-agent: *\n";
-        echo "Allow: /\n";
-        echo "Sitemap: {$siteUrl}/sitemap.xml\n";
+        header('Content-Type: text/plain; charset=utf-8');
+        echo RobotsBuilder::generate();
     }
     
     public function contact(): void
     {
-        $name = $_POST['name'] ?? '';
-        $email = $_POST['email'] ?? '';
-        $message = $_POST['message'] ?? '';
+        $data = [
+            'name' => $_POST['name'] ?? '',
+            'email' => $_POST['email'] ?? '',
+            'phone' => $_POST['phone'] ?? '',
+            'message' => $_POST['message'] ?? '',
+        ];
         
-        $errors = [];
-        if (empty($name) || strlen($name) < 2) {
-            $errors[] = 'Nome é obrigatório';
-        }
-        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $errors[] = 'Email inválido';
-        }
-        if (empty($message) || strlen($message) < 10) {
-            $errors[] = 'Mensagem muito curta';
-        }
-        
+        $errors = ContactMessage::validate($data);
         if (!empty($errors)) {
             $_SESSION['contact_errors'] = $errors;
-            $_SESSION['contact_data'] = compact('name', 'email', 'message');
-            header('Location: /');
+            $_SESSION['contact_data'] = $data;
+            header('Location: /?contact=error');
             exit;
         }
         
+        if (ContactMessage::isRateLimited()) {
+            $_SESSION['contact_errors'] = ['rate' => 'Aguarde um minuto antes de enviar outra mensagem.'];
+            $_SESSION['contact_data'] = $data;
+            header('Location: /?contact=error');
+            exit;
+        }
+        
+        ContactMessage::create($data);
+        ContactMessage::markSent();
+        
+        $siteTitle = Config::get('site_title', 'Site');
         $to = Config::get('contact_email', 'admin@example.com');
-        $subject = 'Novo contato do site: ' . $name;
-        $body = "<p><strong>Nome:</strong> {$name}</p>\n";
-        $body .= "<p><strong>Email:</strong> {$email}</p>\n";
-        $body .= "<p><strong>Mensagem:</strong></p>\n<p>" . nl2br(htmlspecialchars($message)) . "</p>";
+        $subject = 'Nova mensagem de ' . $data['name'] . ' — ' . $siteTitle;
+        
+        $body = "<p><strong>Nome:</strong> " . htmlspecialchars($data['name']) . "</p>\n";
+        $body .= "<p><strong>Email:</strong> " . htmlspecialchars($data['email']) . "</p>\n";
+        if (!empty($data['phone'])) {
+            $body .= "<p><strong>Telefone:</strong> " . htmlspecialchars($data['phone']) . "</p>\n";
+        }
+        $body .= "<p><strong>Mensagem:</strong></p>\n<p>" . nl2br(htmlspecialchars($data['message'])) . "</p>";
         
         Mailer::send($to, $subject, $body);
         
         $_SESSION['contact_success'] = 'Mensagem enviada com sucesso!';
-        header('Location: /');
+        header('Location: /?contact=sent');
         exit;
     }
     

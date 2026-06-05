@@ -53,10 +53,14 @@
                 <input type="email" id="email" name="email" required value="<?= htmlspecialchars($_SESSION['contact_data']['email'] ?? '') ?>">
             </div>
             <div class="form-group">
+                <label for="phone">Telefone (opcional)</label>
+                <input type="tel" id="phone" name="phone" value="<?= htmlspecialchars($_SESSION['contact_data']['phone'] ?? '') ?>">
+            </div>
+            <div class="form-group">
                 <label for="message">Mensagem</label>
                 <textarea id="message" name="message" rows="5" required><?= htmlspecialchars($_SESSION['contact_data']['message'] ?? '') ?></textarea>
             </div>
-            <?php unset($_SESSION['contact_data']); ?>
+            <?php if (isset($_SESSION['contact_data'])) unset($_SESSION['contact_data']); ?>
             <button type="submit" class="btn btn-primary">Enviar Mensagem</button>
         </form>
     </div>

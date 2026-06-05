@@ -77,6 +77,20 @@ class Seeder
             )
         ');
         
+        $db->exec('
+            CREATE TABLE IF NOT EXISTS contact_messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL,
+                phone TEXT,
+                message TEXT NOT NULL,
+                status TEXT DEFAULT "new",
+                ip TEXT,
+                created_at TEXT,
+                updated_at TEXT
+            )
+        ');
+        
         // Migrate pages table if needed (add content_blocks column)
         try {
             $db->exec('ALTER TABLE pages ADD COLUMN content_blocks TEXT');

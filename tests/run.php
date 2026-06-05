@@ -10,6 +10,12 @@ echo "\n";
 require __DIR__ . '/php/BlockEditorTest.php';
 echo "\n";
 require __DIR__ . '/php/LocalBusinessSchemaTest.php';
+echo "\n";
+require __DIR__ . '/php/SitemapTest.php';
+echo "\n";
+require __DIR__ . '/php/RobotsTest.php';
+echo "\n";
+require __DIR__ . '/php/ContactMessageTest.php';
 
 echo "\n=== JS Tests ===\n";
 if (shell_exec('which node')) {
