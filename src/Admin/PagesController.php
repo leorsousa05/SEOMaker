@@ -8,6 +8,7 @@ use App\Content\BlockEditor;
 use App\Core\Database;
 use App\Core\View;
 use App\Models\Address;
+use App\Models\Page;
 use App\Seo\LocalBusinessSchema;
 use App\Seo\SchemaFormBuilder;
 
@@ -79,6 +80,27 @@ class PagesController
         $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
         $schemaType = $_POST['schema_type'] ?? 'WebPage';
         
+        $title = $_POST['title'] ?? '';
+        $slug = $_POST['slug'] ?? '';
+        $autoSlug = isset($_POST['auto_slug']) || $slug === '';
+        
+        if ($autoSlug && $slug === '' && $title !== '') {
+            $slug = Page::generateSlug($title);
+        }
+        
+        $validationData = [
+            'title' => $title,
+            'slug' => $slug,
+        ];
+        $errors = Page::validate($validationData, $id > 0 ? $id : null);
+        if (!empty($errors)) {
+            $_SESSION['form_errors'] = $errors;
+            $_SESSION['form_data'] = $_POST;
+            $redirect = $id > 0 ? '/admin/pages/edit/' . $id : '/admin/pages/edit';
+            header('Location: ' . $redirect);
+            exit;
+        }
+        
         // Build schema JSON from form fields if present
         $schemaData = $_POST['schema_data'] ?? '{}';
         $fields = SchemaFormBuilder::fieldsForType($schemaType);
@@ -106,8 +128,8 @@ class PagesController
         }
         
         $data = [
-            'slug' => $_POST['slug'] ?? '',
-            'title' => $_POST['title'] ?? '',
+            'slug' => $slug,
+            'title' => $title,
             'meta_title' => $_POST['meta_title'] ?? '',
             'meta_description' => $_POST['meta_description'] ?? '',
             'content_html' => $contentHtml,

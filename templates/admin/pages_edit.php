@@ -12,11 +12,28 @@ $schemaType = $page['schema_type'] ?? 'WebPage';
 $schemaValues = $isEdit ? SchemaFormBuilder::parseJson($page['schema_data'] ?? '{}', $schemaType) : [];
 $activeTab = $_GET['tab'] ?? 'content';
 
+$formErrors = $_SESSION['form_errors'] ?? [];
+$formData = $_SESSION['form_data'] ?? [];
+unset($_SESSION['form_errors'], $_SESSION['form_data']);
+
+$page = array_merge($page ?? [], $formData);
+
 $fieldDefs = [];
 foreach ($schemaTypes as $type) {
     $fieldDefs[$type] = SchemaFormBuilder::fieldsForType($type);
 }
 ?>
+
+<?php if (!empty($formErrors)): ?>
+<div class="alert alert-danger">
+    <strong>Corrija os erros abaixo:</strong>
+    <ul style="margin-top: 0.5rem; margin-bottom: 0; padding-left: 1.25rem;">
+        <?php foreach ($formErrors as $field => $message): ?>
+            <li><?= htmlspecialchars($message) ?></li>
+        <?php endforeach; ?>
+    </ul>
+</div>
+<?php endif; ?>
 
 <div class="tabs" data-tabs>
     <nav class="tabs-nav">
@@ -36,14 +53,25 @@ foreach ($schemaTypes as $type) {
         <div class="tabs-panel <?= $activeTab === 'content' ? 'active' : '' ?>" data-tab="content">
             <div class="card" style="margin-bottom: 1.5rem;">
                 <div class="card-body">
-                    <div class="form-group">
+                    <div class="form-group <?= isset($formErrors['title']) ? 'has-error' : '' ?>">
                         <label for="title">Título da Página</label>
                         <input type="text" id="title" name="title" value="<?= htmlspecialchars($page['title'] ?? '') ?>" required>
+                        <?php if (isset($formErrors['title'])): ?>
+                            <span class="error-text"><?= htmlspecialchars($formErrors['title']) ?></span>
+                        <?php endif; ?>
                     </div>
                     
-                    <div class="form-group">
+                    <div class="form-group <?= isset($formErrors['slug']) ? 'has-error' : '' ?>">
                         <label for="slug">URL Amigável (Slug)</label>
                         <input type="text" id="slug" name="slug" value="<?= htmlspecialchars($page['slug'] ?? '') ?>" placeholder="ex: sobre-nos (deixe vazio para homepage)">
+                        <?php if (isset($formErrors['slug'])): ?>
+                            <span class="error-text"><?= htmlspecialchars($formErrors['slug']) ?></span>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <div class="form-group form-check">
+                        <input type="checkbox" id="auto_slug" name="auto_slug" value="1" <?= ($page['auto_slug'] ?? 0) ? 'checked' : '' ?>>
+                        <label for="auto_slug">Gerar slug automaticamente a partir do título</label>
                     </div>
                     
                     <div class="form-group">

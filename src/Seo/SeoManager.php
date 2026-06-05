@@ -38,6 +38,9 @@ class SeoManager
         $tags[] = '<meta name="twitter:card" content="summary_large_image">';
         $tags[] = '<meta name="twitter:title" content="' . self::e($title) . '">';
         $tags[] = '<meta name="twitter:description" content="' . self::e($description) . '">';
+        if ($ogImage = Config::get('og_image')) {
+            $tags[] = '<meta name="twitter:image" content="' . self::e($siteUrl . $ogImage) . '">';
+        }
         
         // Analytics
         if ($gaId = Config::get('analytics_id')) {

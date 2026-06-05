@@ -16,6 +16,10 @@ echo "\n";
 require __DIR__ . '/php/RobotsTest.php';
 echo "\n";
 require __DIR__ . '/php/ContactMessageTest.php';
+echo "\n";
+require __DIR__ . '/php/SeoManagerTest.php';
+echo "\n";
+require __DIR__ . '/php/PageTest.php';
 
 echo "\n=== JS Tests ===\n";
 if (shell_exec('which node')) {
