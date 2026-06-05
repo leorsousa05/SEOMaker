@@ -91,6 +91,18 @@ class Seeder
             )
         ');
         
+        $db->exec('
+            CREATE TABLE IF NOT EXISTS redirects (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                from_path TEXT NOT NULL UNIQUE,
+                to_path TEXT NOT NULL,
+                type TEXT DEFAULT "301",
+                is_active INTEGER DEFAULT 1,
+                created_at TEXT,
+                updated_at TEXT
+            )
+        ');
+        
         // Migrate pages table if needed (add content_blocks column)
         try {
             $db->exec('ALTER TABLE pages ADD COLUMN content_blocks TEXT');

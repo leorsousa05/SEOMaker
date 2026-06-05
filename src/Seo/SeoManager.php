@@ -58,6 +58,38 @@ class SeoManager
         return '<script type="application/ld+json">' . json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
     }
     
+    public static function breadcrumbSchema(Page $page): string
+    {
+        $siteTitle = Config::get('site_title', 'Site');
+        $siteUrl = rtrim(Config::get('site_url', 'https://example.com'), '/');
+        
+        $items = [
+            [
+                '@type' => 'ListItem',
+                'position' => 1,
+                'name' => $siteTitle,
+                'item' => $siteUrl . '/',
+            ],
+        ];
+        
+        if ($page->slug !== '') {
+            $items[] = [
+                '@type' => 'ListItem',
+                'position' => 2,
+                'name' => $page->title ?: $page->meta_title,
+                'item' => $siteUrl . '/page/' . $page->slug,
+            ];
+        }
+        
+        $schema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => $items,
+        ];
+        
+        return '<script type="application/ld+json">' . json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
+    }
+    
     public static function organizationSchema(): string
     {
         $schema = SchemaGenerator::organization();

@@ -14,6 +14,8 @@
         echo "\n";
         echo SeoManager::schemaJsonLd($page);
         echo "\n";
+        echo SeoManager::breadcrumbSchema($page);
+        echo "\n";
         echo SeoManager::organizationSchema();
     }
     ?>

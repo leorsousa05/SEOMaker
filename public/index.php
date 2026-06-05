@@ -10,12 +10,27 @@ use App\Core\Router;
 use App\Admin\AuthController;
 use App\Admin\ContactMessagesController;
 use App\Admin\DashboardController;
+use App\Admin\RedirectsController;
 use App\Admin\SettingsController;
 use App\Admin\MediaController;
 use App\Admin\PagesController;
+use App\Models\Redirect;
 use App\Public\SiteController;
 
 App\Core\Seeder::run();
+
+// Check for active redirects before routing
+$requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+$redirect = Redirect::findByPath($requestPath);
+if ($redirect !== null && $redirect['from_path'] !== $redirect['to_path']) {
+    $code = (int) $redirect['type'];
+    if ($code !== 301 && $code !== 302) {
+        $code = 301;
+    }
+    http_response_code($code);
+    header('Location: ' . $redirect['to_path']);
+    exit;
+}
 
 $router = new Router();
 
@@ -46,6 +61,12 @@ $router->get('/admin/messages', [ContactMessagesController::class, 'index']);
 $router->get('/admin/messages/reply/{id}', [ContactMessagesController::class, 'reply']);
 $router->get('/admin/messages/archive/{id}', [ContactMessagesController::class, 'archive']);
 $router->get('/admin/messages/delete/{id}', [ContactMessagesController::class, 'delete']);
+
+$router->get('/admin/redirects', [RedirectsController::class, 'index']);
+$router->get('/admin/redirects/edit', [RedirectsController::class, 'edit']);
+$router->get('/admin/redirects/edit/{id}', [RedirectsController::class, 'edit']);
+$router->post('/admin/redirects/save', [RedirectsController::class, 'save']);
+$router->get('/admin/redirects/delete/{id}', [RedirectsController::class, 'delete']);
 
 // Error handlers
 $router->setNotFoundHandler(function () {

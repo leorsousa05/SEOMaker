@@ -20,6 +20,10 @@ echo "\n";
 require __DIR__ . '/php/SeoManagerTest.php';
 echo "\n";
 require __DIR__ . '/php/PageTest.php';
+echo "\n";
+require __DIR__ . '/php/BreadcrumbSchemaTest.php';
+echo "\n";
+require __DIR__ . '/php/RedirectTest.php';
 
 echo "\n=== JS Tests ===\n";
 if (shell_exec('which node')) {
