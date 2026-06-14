@@ -1,0 +1,26 @@
+id: 007
+slug: seo-template-redesign
+title: Redesign visual do template SEO para apresentação comercial
+status: completed
+author: architect
+started_at: 2026-06-13
+completed_at: 2026-06-13
+scope:
+  - templates/public/layout.php
+  - templates/public/home.php
+  - templates/public/page.php
+  - templates/public/404.php
+  - templates/admin/layout.php
+  - templates/admin/login.php
+  - templates/admin/dashboard.php
+  - templates/admin/pages.php
+  - templates/admin/pages_edit.php
+  - templates/admin/media.php
+  - templates/admin/messages.php
+  - templates/admin/redirects.php
+  - templates/admin/redirects_edit.php
+  - templates/admin/settings.php
+  - public/assets/style.css
+  - public/assets/admin.css
+  - public/assets/animations.js
+  - src/Public/SiteController.php

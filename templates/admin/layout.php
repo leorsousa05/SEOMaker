@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= isset($pageTitle) ? $pageTitle . ' — ' : '' ?>Admin — <?= htmlspecialchars(App\Core\Config::get('site_title', 'SEO Template')) ?></title>
+    <title><?= isset($pageTitle) ? $pageTitle . ' — ' : '' ?>Admin — <?= htmlspecialchars(App\Core\Config::get('site_title', 'SEO Core')) ?></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/admin.css">
     <script src="/assets/tabs.js" defer></script>
     <?php if (isset($extraScripts)) echo $extraScripts; ?>
@@ -20,8 +23,14 @@
 <body class="admin">
     <aside class="sidebar">
         <div class="sidebar-brand">
-            <div class="sidebar-brand-icon">S</div>
-            <a href="/admin">SEO Template</a>
+            <div class="sidebar-brand-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    <path d="M2 17l10 5 10-5"/>
+                    <path d="M2 12l10 5 10-5"/>
+                </svg>
+            </div>
+            <a href="/admin"><?= htmlspecialchars(App\Core\Config::get('site_title', 'SEO Core')) ?></a>
         </div>
         <nav class="sidebar-nav">
             <a href="/admin" class="<?= ($activeNav ?? '') === 'dashboard' ? 'active' : '' ?>">

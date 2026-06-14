@@ -9,7 +9,8 @@
 - Middleware `requireAuth()` protege rotas admin
 
 ### Dashboard
-- View com estatísticas básicas (total de páginas, última atualização)
+- View com estatísticas (total de páginas, ativas, última atualização)
+- Cards de estatísticas com ícones e identidade visual da marca
 - Menu lateral
 
 ### Settings
@@ -30,3 +31,10 @@
 - Cria usuário admin padrão (admin / admin123 — deve ser alterado)
 - Cria landing page inicial
 - Popula settings defaults
+
+## DESIGN
+
+- Identidade visual alinhada ao site público (logo SVG, tipografia Syne + Inter)
+- Paleta verde/tech: emerald como cor de destaque principal
+- Modo escuro via `data-theme` + `localStorage` + `prefers-color-scheme`
+- Focus states verdes e botões com gradiente de marca
