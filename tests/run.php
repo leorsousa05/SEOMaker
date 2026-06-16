@@ -25,6 +25,8 @@ require __DIR__ . '/php/BreadcrumbSchemaTest.php';
 echo "\n";
 require __DIR__ . '/php/RedirectTest.php';
 echo "\n";
+require __DIR__ . '/php/MediaManagerTest.php';
+echo "\n";
 require __DIR__ . '/php/HomeTemplateTest.php';
 
 echo "\n=== JS Tests ===\n";

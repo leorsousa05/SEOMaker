@@ -11,11 +11,13 @@ class MediaManager
 {
     private static string $uploadDir;
     private static string $uploadUrl;
+    private static string $publicDir;
     
     private static function init(): void
     {
         if (!isset(self::$uploadDir)) {
-            self::$uploadDir = __DIR__ . '/../../public/uploads';
+            self::$publicDir = realpath(__DIR__ . '/../../public') ?: __DIR__ . '/../../public';
+            self::$uploadDir = self::$publicDir . '/uploads';
             self::$uploadUrl = '/uploads';
         }
     }
@@ -62,7 +64,11 @@ class MediaManager
         $path = "{$dir}/{$uniqueName}";
         $relativePath = "/uploads/{$year}/{$month}/{$uniqueName}";
         
-        if (!move_uploaded_file($file['tmp_name'], $path)) {
+        $moved = (PHP_SAPI === 'cli')
+            ? rename($file['tmp_name'], $path)
+            : move_uploaded_file($file['tmp_name'], $path);
+
+        if (!$moved) {
             return ['success' => false, 'error' => 'Falha ao mover arquivo.'];
         }
         
@@ -235,7 +241,9 @@ class MediaManager
             return null;
         }
         
-        $relativeUrl = str_replace(__DIR__ . '/../../public', '', $thumbPath);
+        self::init();
+        $resolvedThumbPath = realpath($thumbPath) ?: $thumbPath;
+        $relativeUrl = str_replace(self::$publicDir, '', $resolvedThumbPath);
         return ['path' => $thumbPath, 'url' => $relativeUrl];
     }
     
