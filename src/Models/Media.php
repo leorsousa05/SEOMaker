@@ -41,6 +41,20 @@ class Media
         return $dir . '/thumb_' . $file;
     }
     
+    public static function find(int $id): ?self
+    {
+        $data = \App\Core\Database::fetchOne('SELECT * FROM media WHERE id = ?', [$id]);
+        if (!$data) {
+            return null;
+        }
+        return self::fromArray($data);
+    }
+    
+    public function url(): string
+    {
+        return $this->path;
+    }
+    
     public function humanSize(): string
     {
         $bytes = $this->size_bytes;

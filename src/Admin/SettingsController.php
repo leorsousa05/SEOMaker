@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\Admin;
 
 use App\Core\Config;
+use App\Core\FileCache;
 use App\Core\View;
+use App\Seo\RobotsBuilder;
+use App\Seo\SitemapGenerator;
 
 class SettingsController
 {
@@ -17,7 +20,7 @@ class SettingsController
         ],
         'seo' => [
             'label' => 'SEO',
-            'keys' => ['meta_default_title', 'meta_default_description', 'og_image', 'robots_txt_custom'],
+            'keys' => ['meta_default_title', 'meta_default_description', 'og_image', 'canonical_host', 'force_trailing_slash', 'robots_txt_custom'],
         ],
         'contato' => [
             'label' => 'Contato',
@@ -43,6 +46,8 @@ class SettingsController
         'meta_default_title' => 'Meta Título Padrão',
         'meta_default_description' => 'Meta Descrição Padrão',
         'og_image' => 'Imagem Open Graph',
+        'canonical_host' => 'Versão canônica do domínio',
+        'force_trailing_slash' => 'Barra final na URL',
         'robots_txt_custom' => 'Conteúdo Customizado do Robots.txt',
         'contact_email' => 'Email de Contato',
         'contact_phone' => 'Telefone',
@@ -76,7 +81,11 @@ class SettingsController
                     Config::set($key, $_POST[$key]);
                 }
             }
-            
+
+            // Invalidate sitemap and robots caches
+            FileCache::delete(SitemapGenerator::CACHE_KEY);
+            FileCache::delete(RobotsBuilder::CACHE_KEY);
+
             $activeTab = $_POST['active_tab'] ?? 'geral';
             $_SESSION['flash'] = 'Configurações salvas com sucesso!';
             header('Location: /admin/settings#' . $activeTab);

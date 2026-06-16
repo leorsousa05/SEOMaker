@@ -6,9 +6,12 @@ namespace App\Seo;
 
 use App\Core\Config;
 use App\Core\Database;
+use App\Core\FileCache;
 
 class SitemapGenerator
 {
+    public const CACHE_KEY = 'sitemap.xml';
+
     public static function generate(): string
     {
         $siteUrl = rtrim(Config::get('site_url', 'https://example.com'), '/');
@@ -33,5 +36,18 @@ class SitemapGenerator
         $xml .= '</urlset>';
         
         return $xml;
+    }
+
+    public static function cachedGenerate(): string
+    {
+        $cached = FileCache::get(self::CACHE_KEY);
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        $content = self::generate();
+        FileCache::set(self::CACHE_KEY, $content);
+
+        return $content;
     }
 }

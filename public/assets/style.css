@@ -250,6 +250,57 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ============================================
+   BREADCRUMB
+   ============================================ */
+.breadcrumb {
+    padding: 0.75rem 0;
+    margin-top: 72px;
+}
+
+.breadcrumb__list {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.breadcrumb__item a {
+    color: var(--color-text-secondary);
+    transition: color var(--transition-fast);
+}
+
+.breadcrumb__item a:hover,
+.breadcrumb__item a:focus-visible {
+    color: var(--color-primary);
+}
+
+.breadcrumb__item--current {
+    color: var(--color-text);
+    font-weight: 600;
+    max-width: 60%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.breadcrumb__separator {
+    color: var(--color-text-muted);
+    user-select: none;
+}
+
+@media (max-width: 768px) {
+    .breadcrumb__item--current {
+        max-width: 50%;
+    }
+}
+
+/* ============================================
    BUTTONS
    ============================================ */
 .btn {

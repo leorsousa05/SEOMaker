@@ -54,6 +54,8 @@
         </div>
     </nav>
 
+    <?= \App\Core\View::partial('public/partials/_breadcrumbs', ['page' => $page ?? null]) ?>
+
     <main>
         <?= $content ?>
     </main>

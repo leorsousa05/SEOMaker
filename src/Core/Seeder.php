@@ -9,7 +9,13 @@ class Seeder
     public static function run(): void
     {
         $db = Database::getInstance();
-        
+
+        // Create cache directory
+        $cacheDir = __DIR__ . '/../../config/cache/';
+        if (!is_dir($cacheDir)) {
+            @mkdir($cacheDir, 0755, true);
+        }
+
         // Create tables
         $db->exec('
             CREATE TABLE IF NOT EXISTS settings (
@@ -114,6 +120,21 @@ class Seeder
         } catch (\PDOException $e) {
             // Column already exists
         }
+        try {
+            $db->exec("ALTER TABLE pages ADD COLUMN meta_robots TEXT DEFAULT 'index, follow'");
+        } catch (\PDOException $e) {
+            // Column already exists
+        }
+        try {
+            $db->exec('ALTER TABLE pages ADD COLUMN canonical_url TEXT');
+        } catch (\PDOException $e) {
+            // Column already exists
+        }
+        try {
+            $db->exec('ALTER TABLE pages ADD COLUMN og_image_id INTEGER');
+        } catch (\PDOException $e) {
+            // Column already exists
+        }
         
         // Seed default admin
         $existing = Database::fetchOne('SELECT 1 FROM users WHERE username = ?', ['admin']);
@@ -133,6 +154,8 @@ class Seeder
             'contact_email' => 'contato@example.com',
             'mail_from' => 'noreply@example.com',
             'mail_from_name' => 'SEO Template',
+            'canonical_host' => 'auto',
+            'force_trailing_slash' => 'auto',
         ];
         
         foreach ($defaults as $key => $value) {

@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Admin;
 
 use App\Core\Database;
+use App\Core\FileCache;
 use App\Core\View;
 use App\Models\Redirect;
+use App\Seo\RobotsBuilder;
+use App\Seo\SitemapGenerator;
 
 class RedirectsController
 {
@@ -85,21 +88,29 @@ class RedirectsController
             Redirect::create($data);
             $_SESSION['flash'] = 'Redirect criado com sucesso!';
         }
-        
+
+        // Invalidate sitemap and robots caches
+        FileCache::delete(SitemapGenerator::CACHE_KEY);
+        FileCache::delete(RobotsBuilder::CACHE_KEY);
+
         header('Location: /admin/redirects');
         exit;
     }
-    
+
     public function delete(array $params): void
     {
         AuthController::requireAuth();
-        
+
         $id = isset($params['id']) ? (int) $params['id'] : 0;
         if ($id > 0) {
             Redirect::delete($id);
             $_SESSION['flash'] = 'Redirect removido com sucesso!';
+
+            // Invalidate sitemap and robots caches
+            FileCache::delete(SitemapGenerator::CACHE_KEY);
+            FileCache::delete(RobotsBuilder::CACHE_KEY);
         }
-        
+
         header('Location: /admin/redirects');
         exit;
     }

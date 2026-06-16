@@ -74,9 +74,12 @@ foreach ($schemaTypes as $type) {
                         <label for="auto_slug">Gerar slug automaticamente a partir do título</label>
                     </div>
                     
-                    <div class="form-group">
+                    <div class="form-group <?= isset($formErrors['content_blocks']) ? 'has-error' : '' ?>">
                         <label>Conteúdo da Página</label>
                         <div id="block-editor" data-blocks="<?= htmlspecialchars(json_encode($contentBlocks)) ?>"></div>
+                        <?php if (isset($formErrors['content_blocks'])): ?>
+                            <span class="error-text"><?= htmlspecialchars($formErrors['content_blocks']) ?></span>
+                        <?php endif; ?>
                         <p class="help-text">Adicione blocos de texto, imagens, vídeos e mais. Não precisa saber HTML!</p>
                     </div>
                     
@@ -104,6 +107,57 @@ foreach ($schemaTypes as $type) {
                         <label for="meta_description">Descrição para o Google</label>
                         <textarea id="meta_description" name="meta_description" rows="2"><?= htmlspecialchars($page['meta_description'] ?? '') ?></textarea>
                         <span class="help-text">Resumo de até 160 caracteres.</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Indexação do Google</label>
+                        <div class="form-check-group">
+                            <label class="form-check">
+                                <input type="radio" name="meta_robots[]" value="index" <?= (strpos($page['meta_robots'] ?? 'index, follow', 'noindex') === false) ? 'checked' : '' ?>>
+                                index
+                            </label>
+                            <label class="form-check">
+                                <input type="radio" name="meta_robots[]" value="noindex" <?= (strpos($page['meta_robots'] ?? 'index, follow', 'noindex') !== false) ? 'checked' : '' ?>>
+                                noindex
+                            </label>
+                        </div>
+                        <div class="form-check-group">
+                            <label class="form-check">
+                                <input type="radio" name="meta_robots[]" value="follow" <?= (strpos($page['meta_robots'] ?? 'index, follow', 'nofollow') === false) ? 'checked' : '' ?>>
+                                follow
+                            </label>
+                            <label class="form-check">
+                                <input type="radio" name="meta_robots[]" value="nofollow" <?= (strpos($page['meta_robots'] ?? 'index, follow', 'nofollow') !== false) ? 'checked' : '' ?>>
+                                nofollow
+                            </label>
+                        </div>
+                        <span class="help-text">Escolha se os motores de busca devem indexar esta página e seguir os links.</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="canonical_url">URL Canônica</label>
+                        <input type="url" id="canonical_url" name="canonical_url" value="<?= htmlspecialchars($page['canonical_url'] ?? '') ?>" placeholder="https://exemplo.com/pagina">
+                        <span class="help-text">Deixe em branco para usar a URL automática desta página.</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Imagem de compartilhamento social</label>
+                        <div class="media-picker" id="og-image-picker">
+                            <?php if (!empty($page['og_image_id'])): ?>
+                                <img src="<?= htmlspecialchars($page['og_image_path'] ?? '') ?>" alt="" class="media-picker-thumb">
+                            <?php else: ?>
+                                <div class="media-picker-placeholder">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                                    <span>Nenhuma imagem selecionada</span>
+                                </div>
+                            <?php endif; ?>
+                            <div class="media-picker-actions">
+                                <button type="button" class="btn btn-ghost" id="og-image-select">Selecionar imagem</button>
+                                <button type="button" class="btn btn-danger" id="og-image-remove" style="<?= empty($page['og_image_id']) ? 'display:none' : '' ?>">Remover</button>
+                            </div>
+                        </div>
+                        <input type="hidden" id="og_image_id" name="og_image_id" value="<?= htmlspecialchars((string) ($page['og_image_id'] ?? '')) ?>">
+                        <span class="help-text">Recomendado: 1200×630px. Usada no Facebook, WhatsApp e Twitter.</span>
                     </div>
                     
                     <div class="form-group">
@@ -161,3 +215,55 @@ window.schemaFieldDefs = <?= json_encode($fieldDefs) ?>;
 </script>
 <script src="/assets/schema-editor.js" defer></script>
 <script src="/assets/block-editor.js" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var selectBtn = document.getElementById('og-image-select');
+    var removeBtn = document.getElementById('og-image-remove');
+    var hiddenInput = document.getElementById('og_image_id');
+    var picker = document.getElementById('og-image-picker');
+    if (!selectBtn || !hiddenInput || !picker) return;
+
+    selectBtn.addEventListener('click', function () {
+        if (typeof window.openMediaModal !== 'function') return;
+        window.openMediaModal(function (url) {
+            if (!url) return;
+            fetch('/admin/media/json')
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (!data.success || !data.items) return;
+                    var item = data.items.find(function (i) { return i.path === url; });
+                    if (!item) return;
+                    hiddenInput.value = item.id;
+                    var thumb = picker.querySelector('.media-picker-thumb');
+                    if (thumb) {
+                        thumb.src = item.path;
+                    } else {
+                        var placeholder = picker.querySelector('.media-picker-placeholder');
+                        if (placeholder) {
+                            thumb = document.createElement('img');
+                            thumb.src = item.path;
+                            thumb.alt = '';
+                            thumb.className = 'media-picker-thumb';
+                            placeholder.parentNode.replaceChild(thumb, placeholder);
+                        }
+                    }
+                    if (removeBtn) removeBtn.style.display = '';
+                });
+        });
+    });
+
+    if (removeBtn) {
+        removeBtn.addEventListener('click', function () {
+            hiddenInput.value = '';
+            var thumb = picker.querySelector('.media-picker-thumb');
+            if (thumb) {
+                var placeholder = document.createElement('div');
+                placeholder.className = 'media-picker-placeholder';
+                placeholder.innerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><span>Nenhuma imagem selecionada</span>';
+                thumb.parentNode.replaceChild(placeholder, thumb);
+            }
+            removeBtn.style.display = 'none';
+        });
+    }
+});
+</script>

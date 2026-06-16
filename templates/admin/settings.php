@@ -14,6 +14,8 @@ $helperTexts = [
     'meta_default_title' => 'Título padrão quando uma página não define o seu.',
     'meta_default_description' => 'Descrição padrão quando uma página não define a sua.',
     'og_image' => 'Imagem que aparece ao compartilhar o site no Facebook/WhatsApp. Recomendado: 1200x630px.',
+    'canonical_host' => 'Redireciona 301 todas as requisições para a versão escolhida.',
+    'force_trailing_slash' => 'Força redirecionamento 301 para URLs com ou sem barra final.',
     'robots_txt_custom' => 'Regras customizadas para robôs de busca. Apenas para usuários avançados.',
     'contact_email' => 'Email que recebe mensagens do formulário de contato.',
     'contact_phone' => 'Telefone de contato que pode aparecer no site.',
@@ -56,7 +58,21 @@ $helperTexts = [
                         <?php foreach ($group['keys'] as $fieldKey): ?>
                             <div class="form-group">
                                 <label for="<?= $fieldKey ?>"><?= htmlspecialchars($labels[$fieldKey] ?? $fieldKey) ?></label>
-                                <?php if (str_contains($fieldKey, '_description') || str_contains($fieldKey, '_custom') || str_contains($fieldKey, '_address')): ?>
+                                <?php if ($fieldKey === 'canonical_host'): ?>
+                                    <?php $canonicalValue = $settings[$fieldKey] ?? 'auto'; ?>
+                                    <select id="<?= $fieldKey ?>" name="<?= $fieldKey ?>">
+                                        <option value="auto" <?= $canonicalValue === 'auto' ? 'selected' : '' ?>>Automático (não forçar)</option>
+                                        <option value="www" <?= $canonicalValue === 'www' ? 'selected' : '' ?>>Forçar www</option>
+                                        <option value="non-www" <?= $canonicalValue === 'non-www' ? 'selected' : '' ?>>Forçar sem www</option>
+                                    </select>
+                                <?php elseif ($fieldKey === 'force_trailing_slash'): ?>
+                                    <?php $slashValue = $settings[$fieldKey] ?? 'auto'; ?>
+                                    <select id="<?= $fieldKey ?>" name="<?= $fieldKey ?>">
+                                        <option value="auto" <?= $slashValue === 'auto' ? 'selected' : '' ?>>Automático (não forçar)</option>
+                                        <option value="1" <?= $slashValue === '1' ? 'selected' : '' ?>>Sempre com barra (/)</option>
+                                        <option value="0" <?= $slashValue === '0' ? 'selected' : '' ?>>Sempre sem barra</option>
+                                    </select>
+                                <?php elseif (str_contains($fieldKey, '_description') || str_contains($fieldKey, '_custom') || str_contains($fieldKey, '_address')): ?>
                                     <textarea id="<?= $fieldKey ?>" name="<?= $fieldKey ?>" rows="3"><?= htmlspecialchars($settings[$fieldKey] ?? '') ?></textarea>
                                 <?php elseif (str_contains($fieldKey, '_pass')): ?>
                                     <input type="password" id="<?= $fieldKey ?>" name="<?= $fieldKey ?>" value="<?= htmlspecialchars($settings[$fieldKey] ?? '') ?>">

@@ -13,6 +13,9 @@ class Page
     public string $title = '';
     public string $meta_title = '';
     public string $meta_description = '';
+    public string $meta_robots = '';
+    public ?string $canonical_url = null;
+    public ?int $og_image_id = null;
     public string $content_html = '';
     public string $schema_type = 'WebPage';
     public string $schema_data = '{}';
@@ -31,6 +34,9 @@ class Page
         $page->title = (string) ($data['title'] ?? '');
         $page->meta_title = (string) ($data['meta_title'] ?? '');
         $page->meta_description = (string) ($data['meta_description'] ?? '');
+        $page->meta_robots = (string) ($data['meta_robots'] ?? '');
+        $page->canonical_url = isset($data['canonical_url']) && $data['canonical_url'] !== '' ? (string) $data['canonical_url'] : null;
+        $page->og_image_id = isset($data['og_image_id']) && $data['og_image_id'] !== '' ? (int) $data['og_image_id'] : null;
         $page->content_html = (string) ($data['content_html'] ?? '');
         $page->schema_type = (string) ($data['schema_type'] ?? 'WebPage');
         $page->schema_data = (string) ($data['schema_data'] ?? '{}');
@@ -51,6 +57,9 @@ class Page
             'title' => $this->title,
             'meta_title' => $this->meta_title,
             'meta_description' => $this->meta_description,
+            'meta_robots' => $this->meta_robots,
+            'canonical_url' => $this->canonical_url,
+            'og_image_id' => $this->og_image_id,
             'content_html' => $this->content_html,
             'schema_type' => $this->schema_type,
             'schema_data' => $this->schema_data,
@@ -58,6 +67,20 @@ class Page
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
+    }
+    
+    public static function defaultMetaRobots(): string
+    {
+        return 'index, follow';
+    }
+    
+    public function ogImageUrl(): ?string
+    {
+        if (!$this->og_image_id) {
+            return null;
+        }
+        $media = Media::find($this->og_image_id);
+        return $media ? $media->url() : null;
     }
     
     public static function generateSlug(string $title): string

@@ -6,6 +6,8 @@ session_start();
 
 require_once __DIR__ . '/../src/autoload.php';
 
+use App\Core\CanonicalRedirect;
+use App\Core\Config;
 use App\Core\Router;
 use App\Admin\AuthController;
 use App\Admin\ContactMessagesController;
@@ -18,6 +20,20 @@ use App\Models\Redirect;
 use App\Public\SiteController;
 
 App\Core\Seeder::run();
+
+// Check canonical host/trailing slash redirect before routing
+$canonicalHost = Config::get('canonical_host', 'auto');
+$forceTrailingSlash = Config::get('force_trailing_slash', 'auto');
+$canonicalRedirect = new CanonicalRedirect((string) $canonicalHost, (string) $forceTrailingSlash);
+$targetUrl = $canonicalRedirect->shouldRedirect(
+    $_SERVER['HTTP_HOST'] ?? 'localhost',
+    $_SERVER['REQUEST_URI'] ?? '/'
+);
+if ($targetUrl !== null) {
+    http_response_code(301);
+    header('Location: ' . $targetUrl);
+    exit;
+}
 
 // Check for active redirects before routing
 $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';

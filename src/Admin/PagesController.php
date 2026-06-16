@@ -6,11 +6,14 @@ namespace App\Admin;
 
 use App\Content\BlockEditor;
 use App\Core\Database;
+use App\Core\FileCache;
 use App\Core\View;
 use App\Models\Address;
 use App\Models\Page;
 use App\Seo\LocalBusinessSchema;
+use App\Seo\RobotsBuilder;
 use App\Seo\SchemaFormBuilder;
+use App\Seo\SitemapGenerator;
 
 class PagesController
 {
@@ -46,6 +49,14 @@ class PagesController
             $addrData = Database::fetchOne('SELECT * FROM addresses WHERE id = ?', [$page['address_id']]);
             if ($addrData) {
                 $address = Address::fromArray($addrData);
+            }
+        }
+        
+        // Load OG image path if page has one
+        if ($page && !empty($page['og_image_id'])) {
+            $mediaData = Database::fetchOne('SELECT path FROM media WHERE id = ?', [$page['og_image_id']]);
+            if ($mediaData) {
+                $page['og_image_path'] = $mediaData['path'];
             }
         }
         
@@ -120,11 +131,23 @@ class PagesController
         // Build content blocks from editor
         $contentBlocks = $_POST['content_blocks'] ?? '';
         $contentHtml = '';
+        $blockErrors = [];
         if ($contentBlocks) {
             $blocks = json_decode($contentBlocks, true);
             if (is_array($blocks)) {
-                $contentHtml = BlockEditor::render($blocks);
+                $blockErrors = BlockEditor::validateBlocks($blocks);
+                if (empty($blockErrors)) {
+                    $contentHtml = BlockEditor::render($blocks);
+                }
             }
+        }
+        
+        if (!empty($blockErrors)) {
+            $_SESSION['form_errors'] = ['content_blocks' => 'Corrija os erros nos blocos de conteúdo.'] + $blockErrors;
+            $_SESSION['form_data'] = $_POST;
+            $redirect = $id > 0 ? '/admin/pages/edit/' . $id : '/admin/pages/edit';
+            header('Location: ' . $redirect);
+            exit;
         }
         
         $data = [
@@ -132,6 +155,9 @@ class PagesController
             'title' => $title,
             'meta_title' => $_POST['meta_title'] ?? '',
             'meta_description' => $_POST['meta_description'] ?? '',
+            'meta_robots' => self::sanitizeMetaRobots($_POST['meta_robots'] ?? []),
+            'canonical_url' => self::sanitizeCanonicalUrl($_POST['canonical_url'] ?? ''),
+            'og_image_id' => isset($_POST['og_image_id']) && $_POST['og_image_id'] !== '' ? (int) $_POST['og_image_id'] : null,
             'content_html' => $contentHtml,
             'content_blocks' => $contentBlocks,
             'schema_type' => $schemaType,
@@ -150,6 +176,10 @@ class PagesController
             $_SESSION['flash'] = 'Página criada com sucesso!';
         }
         
+        // Invalidate sitemap and robots caches
+        FileCache::delete(SitemapGenerator::CACHE_KEY);
+        FileCache::delete(RobotsBuilder::CACHE_KEY);
+
         // Save/update address
         if (isset($_POST['address_street']) && $_POST['address_street'] !== '') {
             $addrData = [
@@ -184,6 +214,39 @@ class PagesController
         exit;
     }
     
+    private static function sanitizeCanonicalUrl(string $url): ?string
+    {
+        $url = trim($url);
+        if ($url === '') {
+            return null;
+        }
+        if (preg_match('/^(https?:\/\/|\/)/i', $url) !== 1) {
+            return null;
+        }
+        if (stripos($url, 'javascript:') === 0) {
+            return null;
+        }
+        return $url;
+    }
+    
+    /**
+     * @param array<int, string> $values
+     */
+    private static function sanitizeMetaRobots(array $values): string
+    {
+        $allowed = ['index', 'noindex', 'follow', 'nofollow'];
+        $tokens = [];
+        foreach ($values as $value) {
+            $value = (string) $value;
+            if (in_array($value, $allowed, true)) {
+                $tokens[] = $value;
+            }
+        }
+        $index = in_array('noindex', $tokens, true) ? 'noindex' : 'index';
+        $follow = in_array('nofollow', $tokens, true) ? 'nofollow' : 'follow';
+        return $index . ', ' . $follow;
+    }
+    
     public function delete(array $params): void
     {
         AuthController::requireAuth();
@@ -194,8 +257,12 @@ class PagesController
             Database::delete('addresses', 'page_id = ?', [$id]);
             Database::delete('pages', 'id = ?', [$id]);
             $_SESSION['flash'] = 'Página removida com sucesso!';
+
+            // Invalidate sitemap and robots caches
+            FileCache::delete(SitemapGenerator::CACHE_KEY);
+            FileCache::delete(RobotsBuilder::CACHE_KEY);
         }
-        
+
         header('Location: /admin/pages');
         exit;
     }

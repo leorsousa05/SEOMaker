@@ -586,6 +586,48 @@ body {
     gap: 0.5rem;
 }
 
+.form-check-group {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.media-picker {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-muted);
+}
+
+.media-picker-placeholder {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.media-picker-thumb {
+    width: 120px;
+    height: 63px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+.media-picker-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.be-input-error {
+    border-color: var(--accent-red) !important;
+    background: rgba(239, 68, 68, 0.05) !important;
+}
+
 .form-group.has-error input,
 .form-group.has-error textarea,
 .form-group.has-error select {

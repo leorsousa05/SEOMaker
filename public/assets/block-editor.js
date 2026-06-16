@@ -354,10 +354,46 @@
         return div.innerHTML;
     }
 
+    function validateAltFields() {
+        var valid = true;
+        editor.querySelectorAll('.be-block').forEach(function (blockEl) {
+            var typeEl = blockEl.querySelector('.be-block-type');
+            if (!typeEl) return;
+            var type = typeEl.textContent;
+            if (type !== 'Imagem' && type !== 'Galeria') return;
+            var altInput = blockEl.querySelector('[data-prop="alt"]');
+            if (!altInput) return;
+            if (altInput.value.trim() === '') {
+                altInput.classList.add('be-input-error');
+                altInput.setAttribute('aria-invalid', 'true');
+                valid = false;
+            } else {
+                altInput.classList.remove('be-input-error');
+                altInput.removeAttribute('aria-invalid');
+            }
+        });
+        return valid;
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         var container = document.getElementById('block-editor');
         if (container) initBlockEditor(container);
+
+        var pageForm = document.getElementById('page-form');
+        if (pageForm) {
+            pageForm.addEventListener('submit', function (e) {
+                if (!validateAltFields()) {
+                    e.preventDefault();
+                    var firstInvalid = editor.querySelector('.be-input-error');
+                    if (firstInvalid) {
+                        firstInvalid.focus();
+                        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            });
+        }
     });
 
     window.BlockEditor = { init: initBlockEditor };
+    window.openMediaModal = openMediaModal;
 })();

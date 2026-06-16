@@ -54,13 +54,13 @@ class SiteController
     public function sitemap(): void
     {
         header('Content-Type: application/xml; charset=utf-8');
-        echo SitemapGenerator::generate();
+        echo SitemapGenerator::cachedGenerate();
     }
-    
+
     public function robots(): void
     {
         header('Content-Type: text/plain; charset=utf-8');
-        echo RobotsBuilder::generate();
+        echo RobotsBuilder::cachedGenerate();
     }
     
     public function contact(): void

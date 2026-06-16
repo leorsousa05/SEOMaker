@@ -9,11 +9,14 @@ use App\Core\Database;
 
 class BlockEditor
 {
+    private static int $imageCounter = 0;
+    
     /**
      * @param array<int, array<string, mixed>> $blocks
      */
     public static function render(array $blocks): string
     {
+        self::$imageCounter = 0;
         $html = '';
         foreach ($blocks as $block) {
             $html .= self::renderBlock($block);
@@ -76,8 +79,11 @@ class BlockEditor
             return '';
         }
         
+        self::$imageCounter++;
+        $loading = self::$imageCounter === 1 ? 'eager' : 'lazy';
+        
         $html = '<figure class="block block-image block-image--' . $align . '">';
-        $html .= '<img src="' . self::e($path) . '" alt="' . $alt . '" loading="lazy">';
+        $html .= '<img src="' . self::e($path) . '" alt="' . $alt . '" loading="' . $loading . '">';
         if ($caption) {
             $html .= '<figcaption>' . $caption . '</figcaption>';
         }
@@ -104,8 +110,10 @@ class BlockEditor
         $mediaItems = Database::fetchAll("SELECT id, path, original_name FROM media WHERE id IN ({$placeholders})", $mediaIds);
         
         foreach ($mediaItems as $item) {
+            self::$imageCounter++;
+            $loading = self::$imageCounter === 1 ? 'eager' : 'lazy';
             $html .= '<div class="gallery-item">';
-            $html .= '<img src="' . self::e($item['path']) . '" alt="' . self::e($item['original_name']) . '" loading="lazy">';
+            $html .= '<img src="' . self::e($item['path']) . '" alt="' . self::e($item['original_name']) . '" loading="' . $loading . '">';
             $html .= '</div>';
         }
         
@@ -237,5 +245,40 @@ class BlockEditor
     private static function e(string $text): string
     {
         return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+    }
+    
+    public static function requiresAltText(string $blockType): bool
+    {
+        return in_array($blockType, ['image', 'gallery'], true);
+    }
+    
+    /**
+     * @param array<int, array<string, mixed>> $blocks
+     * @return array<int, string>
+     */
+    public static function validateBlocks(array $blocks): array
+    {
+        $errors = [];
+        foreach ($blocks as $index => $block) {
+            if (!is_array($block)) {
+                continue;
+            }
+            $type = $block['type'] ?? '';
+            if ($type === 'image') {
+                $alt = trim((string) ($block['alt'] ?? ''));
+                if ($alt === '') {
+                    $errors[$index] = 'O campo "Texto alternativo" da imagem é obrigatório.';
+                }
+            } elseif ($type === 'gallery') {
+                $mediaIds = $block['media_ids'] ?? [];
+                if (!empty($mediaIds)) {
+                    $alt = trim((string) ($block['alt'] ?? ''));
+                    if ($alt === '') {
+                        $errors[$index] = 'O campo "Texto alternativo" da galeria é obrigatório.';
+                    }
+                }
+            }
+        }
+        return $errors;
     }
 }
