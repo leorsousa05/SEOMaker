@@ -2,7 +2,7 @@ id: 006-sitemap-contact-email
 title: Sitemap XML, Robots.txt e Formulário de Contato com Email
 author: agent
 part: 4
-status: draft
+status: completed
 dependencies:
   - 005-media-gallery
   - redesign-vercel
