@@ -28,7 +28,7 @@
     <nav class="sticky top-0 z-50 bg-white/85 dark:bg-zinc-950/85 backdrop-blur-md border-b border-zinc-200/50 dark:border-zinc-800/50 py-4 transition-colors">
         <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
             <a href="/" class="text-2xl font-black font-title tracking-tight bg-gradient-to-r from-violet-600 to-blue-500 bg-clip-text text-transparent">
-                <?= htmlspecialchars(Config::get('site_title', 'SEO Template')) ?>
+                <?= htmlspecialchars(Config::get('site_title', 'SEOMaker')) ?>
             </a>
             <div class="flex items-center gap-6">
                 <?php
@@ -38,9 +38,6 @@
                     echo '<a href="' . htmlspecialchars($url) . '" class="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors">' . htmlspecialchars($mp['title']) . '</a>';
                 }
                 ?>
-                <a href="/admin" class="bg-violet-600 hover:bg-violet-500 hover:shadow-[0_0_20px_rgba(124,58,237,0.3)] text-white text-xs font-bold py-2.5 px-4 rounded-lg transition-all active:scale-97">
-                    Painel
-                </a>
             </div>
         </div>
     </nav>
@@ -54,7 +51,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
                 <div class="flex flex-col gap-3">
                     <h3 class="text-lg font-bold font-title text-zinc-900 dark:text-white">
-                        <?= htmlspecialchars(Config::get('site_title', 'SEO Template')) ?>
+                        <?= htmlspecialchars(Config::get('site_title', 'SEOMaker')) ?>
                     </h3>
                     <p class="text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-sm">
                         <?= htmlspecialchars(Config::get('site_description', 'Template completo para SEO com painel administrativo.')) ?></p>

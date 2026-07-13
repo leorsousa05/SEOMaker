@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= isset($pageTitle) ? $pageTitle . ' — ' : '' ?>Admin — <?= htmlspecialchars(App\Core\Config::get('site_title', 'SEO Template')) ?></title>
+    <title><?= isset($pageTitle) ? $pageTitle . ' — ' : '' ?>Admin — <?= htmlspecialchars(App\Core\Config::get('site_title', 'SEOMaker')) ?></title>
     <link rel="stylesheet" href="/assets/admin.css">
     <script src="/assets/tabs.js" defer></script>
     <?php if (isset($extraScripts)) echo $extraScripts; ?>
@@ -21,7 +21,7 @@
     <aside class="sidebar">
         <div class="sidebar-brand">
             <div class="sidebar-brand-icon">S</div>
-            <a href="/admin">SEO Template</a>
+            <a href="/admin">SEOMaker</a>
         </div>
         <nav class="sidebar-nav">
             <a href="/admin" class="<?= ($activeNav ?? '') === 'dashboard' ? 'active' : '' ?>">
@@ -31,6 +31,10 @@
             <a href="/admin/pages" class="<?= ($activeNav ?? '') === 'pages' ? 'active' : '' ?>">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                 Páginas
+            </a>
+            <a href="/admin/products" class="<?= ($activeNav ?? '') === 'products' ? 'active' : '' ?>">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                Produtos
             </a>
             <a href="/admin/media" class="<?= ($activeNav ?? '') === 'media' ? 'active' : '' ?>">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>

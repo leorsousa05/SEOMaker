@@ -104,6 +104,29 @@ class Seeder
             )
         ');
         
+        $db->exec('
+            CREATE TABLE IF NOT EXISTS products (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                slug TEXT NOT NULL UNIQUE,
+                short_description TEXT,
+                description TEXT,
+                price REAL DEFAULT 0,
+                promo_price REAL,
+                image_id INTEGER,
+                gallery_ids TEXT DEFAULT "[]",
+                category TEXT,
+                tags TEXT,
+                sku TEXT,
+                stock INTEGER DEFAULT 0,
+                external_link TEXT,
+                featured INTEGER DEFAULT 0,
+                is_active INTEGER DEFAULT 1,
+                created_at TEXT,
+                updated_at TEXT
+            )
+        ');
+        
         // Migrate pages table if needed (add content_blocks column)
         try {
             $db->exec('ALTER TABLE pages ADD COLUMN content_blocks TEXT');
@@ -133,12 +156,12 @@ class Seeder
         
         // Seed default settings
         $defaults = [
-            'site_title' => 'SEO Template PHP',
+            'site_title' => 'SEOMaker',
             'site_description' => 'Template completo para SEO com painel administrativo em PHP puro.',
             'site_url' => 'https://example.com',
             'contact_email' => 'contato@example.com',
             'mail_from' => 'noreply@example.com',
-            'mail_from_name' => 'SEO Template',
+            'mail_from_name' => 'SEOMaker',
         ];
         
         foreach ($defaults as $key => $value) {
@@ -157,14 +180,14 @@ class Seeder
         if (!$existingHome) {
             Database::insert('pages', [
                 'slug' => '',
-                'title' => 'SEO Template PHP',
-                'meta_title' => 'SEO Template PHP - Otimização Completa',
+                'title' => 'SEOMaker',
+                'meta_title' => 'SEOMaker - Otimização Completa',
                 'meta_description' => 'Template PHP para SEO com schema.org, sitemap, meta tags e painel administrativo.',
-                'content_html' => '<p>Bem-vindo ao SEO Template PHP. Este é um template completo para criação de sites otimizados para motores de busca.</p>',
+                'content_html' => '<p>Bem-vindo ao SEOMaker. Este é um template completo para criação de sites otimizados para motores de busca.</p>',
                 'schema_type' => 'WebSite',
                 'schema_data' => json_encode([
                     '@type' => 'WebSite',
-                    'name' => 'SEO Template PHP',
+                    'name' => 'SEOMaker',
                 ]),
                 'is_active' => 1,
                 'created_at' => date('Y-m-d H:i:s'),
@@ -184,8 +207,8 @@ class Seeder
             Database::insert('pages', [
                 'slug' => 'sobre',
                 'title' => 'Sobre Nós',
-                'meta_title' => 'Sobre - SEO Template PHP',
-                'meta_description' => 'Conheça mais sobre o SEO Template PHP.',
+                'meta_title' => 'Sobre - SEOMaker',
+                'meta_description' => 'Conheça mais sobre o SEOMaker.',
                 'content_html' => '<p>Este template foi desenvolvido para oferecer uma base sólida para projetos web focados em SEO.</p><p>Recursos incluem: geração automática de sitemap, schema.org JSON-LD, meta tags otimizadas e painel administrativo completo.</p>',
                 'schema_type' => 'AboutPage',
                 'schema_data' => '{}',

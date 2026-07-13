@@ -20,7 +20,7 @@ if (!function_exists('assertTrue')) {
 }
 
 Seeder::run();
-Config::set('site_title', 'Test Site');
+Config::set('site_title', 'SEOMaker');
 Config::set('site_url', 'https://example.com');
 
 $page = new Page();

@@ -24,7 +24,7 @@ if (!function_exists('assertTrue')) {
 Seeder::run();
 
 // Ensure test settings
-Config::set('site_title', 'Test Site');
+Config::set('site_title', 'SEOMaker');
 Config::set('site_description', 'Test description');
 Config::set('site_url', 'https://example.com');
 Config::set('og_image', '/uploads/og.png');

@@ -95,6 +95,16 @@ $pricing = [
         'cta' => 'Falar com Especialista'
     ]
 ];
+
+// Fetch featured products for home section
+$featuredProducts = [];
+try {
+    $featuredProducts = \App\Core\Database::fetchAll(
+        'SELECT p.*, m.path AS image_path FROM products p LEFT JOIN media m ON p.image_id = m.id WHERE p.featured = 1 AND p.is_active = 1 ORDER BY p.id DESC LIMIT 12'
+    );
+} catch (\Throwable $e) {
+    // Table might not exist yet during first run
+}
 ?>
 
 <!-- Section 1: Hero Banner & Interactive Browser Mockup -->
@@ -444,6 +454,86 @@ $pricing = [
     </div>
 </section>
 
+<!-- Section: Nossos Produtos -->
+<?php if (!empty($featuredProducts)): ?>
+<section id="produtos" class="py-24 bg-zinc-50 dark:bg-zinc-900/20 border-y border-zinc-200/50 dark:border-zinc-800/50 transition-colors">
+    <div class="max-w-7xl mx-auto px-6">
+        <!-- Header -->
+        <div class="text-center max-w-2xl mx-auto mb-16">
+            <div class="inline-flex items-center gap-2 text-violet-600 dark:text-violet-400 text-sm font-semibold uppercase tracking-widest mb-4">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>
+                Catálogo
+            </div>
+            <h2 class="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight mb-4">Nossos Produtos</h2>
+            <p class="text-zinc-500 dark:text-zinc-400 text-lg">Confira os produtos em destaque da nossa loja.</p>
+        </div>
+
+        <!-- Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <?php foreach ($featuredProducts as $prod): ?>
+            <?php
+                $hasPromo  = !empty($prod['promo_price']) && (float)$prod['promo_price'] > 0;
+                $finalPrice = $hasPromo ? (float)$prod['promo_price'] : (float)$prod['price'];
+                $productUrl = !empty($prod['external_link']) ? htmlspecialchars($prod['external_link']) : '/produtos/' . htmlspecialchars($prod['slug']);
+                $isExternal = !empty($prod['external_link']);
+            ?>
+            <article class="group relative bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200/60 dark:border-zinc-800/60 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                <!-- Image -->
+                <div class="relative aspect-square bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+                    <?php if (!empty($prod['image_path'])): ?>
+                        <img
+                            src="<?= htmlspecialchars($prod['image_path']) ?>"
+                            alt="<?= htmlspecialchars($prod['name']) ?>"
+                            loading="lazy"
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        >
+                    <?php else: ?>
+                        <div class="w-full h-full flex items-center justify-content-center text-zinc-300 dark:text-zinc-700" style="display:flex;align-items:center;justify-content:center;">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($hasPromo): ?>
+                        <span class="absolute top-3 left-3 bg-violet-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">Em Promoção</span>
+                    <?php endif; ?>
+                    <?php if (!empty($prod['category'])): ?>
+                        <span class="absolute top-3 right-3 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm text-zinc-600 dark:text-zinc-300 text-xs font-medium px-2.5 py-1 rounded-full border border-zinc-200/60 dark:border-zinc-700/60"><?= htmlspecialchars($prod['category']) ?></span>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Info -->
+                <div class="p-5">
+                    <h3 class="font-semibold text-zinc-900 dark:text-white text-sm leading-snug mb-1 line-clamp-2"><?= htmlspecialchars($prod['name']) ?></h3>
+                    <?php if (!empty($prod['short_description'])): ?>
+                        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed mb-3 line-clamp-2"><?= htmlspecialchars($prod['short_description']) ?></p>
+                    <?php endif; ?>
+
+                    <!-- Price -->
+                    <div class="flex items-baseline gap-2 mb-4">
+                        <?php if ($hasPromo): ?>
+                            <span class="text-xs text-zinc-400 line-through">R$ <?= number_format((float)$prod['price'], 2, ',', '.') ?></span>
+                        <?php endif; ?>
+                        <span class="text-lg font-bold <?= $hasPromo ? 'text-violet-600 dark:text-violet-400' : 'text-zinc-900 dark:text-white' ?>">
+                            R$ <?= number_format($finalPrice, 2, ',', '.') ?>
+                        </span>
+                    </div>
+
+                    <!-- CTA -->
+                    <a
+                        href="<?= $productUrl ?>"
+                        <?= $isExternal ? 'target="_blank" rel="noopener noreferrer"' : '' ?>
+                        class="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-sm font-semibold hover:bg-violet-600 dark:hover:bg-violet-500 dark:hover:text-white transition-colors duration-200"
+                    >
+                        <?= $isExternal ? 'Ver Oferta' : 'Saiba Mais' ?>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                </div>
+            </article>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
 <!-- Section 8: Redesigned High-End Contact & Location Form -->
 <section id="contato" class="py-24 bg-white dark:bg-zinc-950 transition-colors relative">
     <div class="max-w-7xl mx-auto px-6">
@@ -513,7 +603,7 @@ $pricing = [
                     <?php unset($_SESSION['contact_errors']); ?>
                 <?php endif; ?>
                 
-                <form action="/contact" method="POST" class="bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200/60 dark:border-zinc-800/60 rounded-3xl p-8 md:p-12 shadow-xl">
+                <form id="contact-form" action="/contact" method="POST" class="bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200/60 dark:border-zinc-800/60 rounded-3xl p-8 md:p-12 shadow-xl">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
                             <label for="name" class="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">Nome Completo</label>
@@ -545,3 +635,148 @@ $pricing = [
         </div>
     </div>
 </section>
+
+<!-- Success Modal -->
+<div id="contact-success-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-white dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800/60 rounded-3xl p-8 max-w-md w-full shadow-2xl transform scale-95 transition-transform duration-300 relative overflow-hidden">
+        <!-- Background light glow effect -->
+        <div class="absolute -top-24 -right-24 w-48 h-48 bg-violet-600/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <div class="flex flex-col items-center text-center relative z-10">
+            <!-- Icon -->
+            <div class="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mb-6 ring-8 ring-emerald-500/5">
+                <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            
+            <!-- Content -->
+            <h3 class="text-xl font-bold font-title text-zinc-900 dark:text-white mb-2">Mensagem Enviada!</h3>
+            <p class="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed mb-8">
+                Obrigado pelo seu contato. Nossa equipe de especialistas analisará sua mensagem e retornará em breve.
+            </p>
+            
+            <!-- Close Button -->
+            <button onclick="closeContactModal()" class="w-full bg-zinc-900 dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-100 text-white dark:text-zinc-900 font-bold py-3.5 px-6 rounded-xl transition-all active:scale-97 cursor-pointer">
+                Entendido
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('contact-form');
+    const modal = document.getElementById('contact-success-modal');
+    const modalContent = modal ? modal.querySelector('div') : null;
+    
+    // Check if redirect query string contact=sent is present
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('contact') === 'sent') {
+        openContactModal();
+        // Clean url parameter without reloading page
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <span class="inline-flex items-center gap-2 justify-center">
+                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Enviando...
+                </span>
+            `;
+            
+            const formData = new FormData(form);
+            
+            fetch('/contact', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+                
+                if (data.success) {
+                    form.reset();
+                    // Clear error messages if any
+                    const errorContainer = document.getElementById('contact-error-container');
+                    if (errorContainer) errorContainer.classList.add('hidden');
+                    
+                    openContactModal();
+                } else {
+                    // Show validation or rate limit errors
+                    showErrors(data.errors);
+                }
+            })
+            .catch(error => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+                console.error('Error:', error);
+                // Fallback to standard form submission if AJAX fails
+                form.submit();
+            });
+        });
+    }
+    
+    function openContactModal() {
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            if (modalContent) {
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }
+        }, 10);
+    }
+    
+    window.closeContactModal = function() {
+        if (!modal) return;
+        modal.classList.add('opacity-0');
+        if (modalContent) {
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+        }
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    };
+    
+    function showErrors(errors) {
+        let errorContainer = document.getElementById('contact-error-container');
+        if (!errorContainer) {
+            errorContainer = document.createElement('div');
+            errorContainer.id = 'contact-error-container';
+            errorContainer.className = 'bg-rose-500/10 border border-rose-500/25 text-rose-600 dark:text-rose-400 rounded-2xl p-5 mb-8 text-sm';
+            form.parentNode.insertBefore(errorContainer, form);
+        }
+        
+        errorContainer.innerHTML = '';
+        errorContainer.classList.remove('hidden');
+        
+        Object.keys(errors).forEach(key => {
+            const p = document.createElement('p');
+            p.className = 'mb-1.5 last:mb-0 font-medium';
+            p.textContent = errors[key];
+            errorContainer.appendChild(p);
+        });
+        
+        // Scroll to error container
+        errorContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+});
+</script>

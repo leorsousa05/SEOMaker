@@ -325,7 +325,7 @@
                     } else {
                         var selectedEl = grid.querySelector('.media-modal-item.selected');
                         if (selectedEl) {
-                            callback(selectedEl.dataset.url);
+                            callback([{ id: parseInt(selectedEl.dataset.id), path: selectedEl.dataset.url }]);
                         }
                     }
                 };
@@ -502,4 +502,5 @@
     });
 
     window.BlockEditor = { init: initBlockEditor };
+    window.openMediaModal = openMediaModal;
 })();

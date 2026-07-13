@@ -1,0 +1,9 @@
+id: 010-remove-admin-button-rename-site
+title: Remove Admin Button and Rename Site to SEOMaker
+author: agent
+created_at: 2026-07-13
+status: completed
+scope: layout-settings
+type: modification
+dependencies: []
+tests: true

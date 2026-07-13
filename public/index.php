@@ -14,6 +14,7 @@ use App\Admin\RedirectsController;
 use App\Admin\SettingsController;
 use App\Admin\MediaController;
 use App\Admin\PagesController;
+use App\Admin\ProductsController;
 use App\Models\Redirect;
 use App\Public\SiteController;
 
@@ -40,6 +41,8 @@ $router->get('/page/{slug}', [SiteController::class, 'redirectToSlug']);
 $router->get('/sitemap.xml', [SiteController::class, 'sitemap']);
 $router->get('/robots.txt', [SiteController::class, 'robots']);
 $router->post('/contact', [SiteController::class, 'contact']);
+$router->get('/produtos/{slug}', [SiteController::class, 'product']);
+
 
 // Admin routes
 $router->get('/admin/login', [AuthController::class, 'login']);
@@ -53,6 +56,11 @@ $router->get('/admin/pages/edit', [PagesController::class, 'edit']);
 $router->get('/admin/pages/edit/{id}', [PagesController::class, 'edit']);
 $router->post('/admin/pages/save', [PagesController::class, 'save']);
 $router->get('/admin/pages/delete/{id}', [PagesController::class, 'delete']);
+$router->get('/admin/products',              [ProductsController::class, 'index']);
+$router->get('/admin/products/edit',         [ProductsController::class, 'edit']);
+$router->get('/admin/products/edit/{id}',    [ProductsController::class, 'edit']);
+$router->post('/admin/products/save',        [ProductsController::class, 'save']);
+$router->get('/admin/products/delete/{id}',  [ProductsController::class, 'delete']);
 $router->get('/admin/media', [MediaController::class, 'index']);
 $router->post('/admin/media/upload', [MediaController::class, 'upload']);
 $router->get('/admin/media/delete/{id}', [MediaController::class, 'delete']);

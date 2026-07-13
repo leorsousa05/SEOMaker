@@ -9,7 +9,7 @@
 <body class="login-page">
     <div class="login-box">
         <div class="login-logo">S</div>
-        <h1>SEO Template</h1>
+        <h1>SEOMaker</h1>
         <p class="subtitle">Painel de administração</p>
         <?php if (!empty($error)): ?>
             <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
