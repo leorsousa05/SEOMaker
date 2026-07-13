@@ -30,6 +30,7 @@ class Seeder
                 schema_type TEXT DEFAULT "WebPage",
                 schema_data TEXT DEFAULT "{}",
                 is_active INTEGER DEFAULT 1,
+                in_menu INTEGER DEFAULT 0,
                 created_at TEXT,
                 updated_at TEXT
             )
@@ -111,6 +112,11 @@ class Seeder
         }
         try {
             $db->exec('ALTER TABLE pages ADD COLUMN address_id INTEGER');
+        } catch (\PDOException $e) {
+            // Column already exists
+        }
+        try {
+            $db->exec('ALTER TABLE pages ADD COLUMN in_menu INTEGER DEFAULT 0');
         } catch (\PDOException $e) {
             // Column already exists
         }

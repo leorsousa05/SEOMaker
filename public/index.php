@@ -36,7 +36,7 @@ $router = new Router();
 
 // Public routes
 $router->get('/', [SiteController::class, 'home']);
-$router->get('/page/{slug}', [SiteController::class, 'page']);
+$router->get('/page/{slug}', [SiteController::class, 'redirectToSlug']);
 $router->get('/sitemap.xml', [SiteController::class, 'sitemap']);
 $router->get('/robots.txt', [SiteController::class, 'robots']);
 $router->post('/contact', [SiteController::class, 'contact']);
@@ -67,6 +67,9 @@ $router->get('/admin/redirects/edit', [RedirectsController::class, 'edit']);
 $router->get('/admin/redirects/edit/{id}', [RedirectsController::class, 'edit']);
 $router->post('/admin/redirects/save', [RedirectsController::class, 'save']);
 $router->get('/admin/redirects/delete/{id}', [RedirectsController::class, 'delete']);
+
+// Root dynamic routing fallback
+$router->get('/{slug}', [SiteController::class, 'page']);
 
 // Error handlers
 $router->setNotFoundHandler(function () {

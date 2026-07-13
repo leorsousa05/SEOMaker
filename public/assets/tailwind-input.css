@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg-primary-light: hsl(0 0% 100%);
+  --color-bg-surface-light: hsl(240 5% 98%);
+  --color-bg-elevated-light: hsl(0 0% 100%);
+  --color-text-primary-light: hsl(240 10% 4%);
+  --color-text-secondary-light: hsl(240 5% 35%);
+  --color-text-muted-light: hsl(240 5% 55%);
+  --color-border-light: hsl(240 6% 90%);
+
+  --color-bg-primary-dark: hsl(240 10% 4%);
+  --color-bg-surface-dark: hsl(240 10% 6%);
+  --color-bg-elevated-dark: hsl(240 10% 10%);
+  --color-text-primary-dark: hsl(0 0% 98%);
+  --color-text-secondary-dark: hsl(240 5% 65%);
+  --color-text-muted-dark: hsl(240 5% 45%);
+  --color-border-dark: hsl(240 6% 15%);
+
+  --color-primary: hsl(262 83% 62%);
+  --color-primary-foreground: hsl(0 0% 100%);
+  --color-success: hsl(142 72% 29%);
+  --color-error: hsl(0 84% 60%);
+
+  --font-title: "Outfit", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  --animate-scale-press: scale-press 0.1s ease-out;
+}
+
+@keyframes scale-press {
+  0% { transform: scale(1); }
+  100% { transform: scale(0.97); }
+}
+
+/* Custom visual layout support for BlockEditor blocks */
+.block-text {
+  @apply max-w-3xl mx-auto px-4;
+}
+
+.block-text p {
+  @apply mb-4 text-zinc-600 dark:text-zinc-400 text-lg leading-relaxed;
+}
+
+.block-text h2 {
+  @apply text-3xl font-black font-title tracking-tight mt-12 mb-4 text-zinc-900 dark:text-white;
+}
+
+.block-text h3 {
+  @apply text-2xl font-bold font-title tracking-tight mt-8 mb-4 text-zinc-900 dark:text-white;
+}
+
+.block-text ul, .block-text ol {
+  @apply mb-4 pl-6 text-zinc-600 dark:text-zinc-400 list-disc;
+}
+
+.block-text li {
+  @apply mb-1;
+}
+
+.block-image {
+  @apply my-8 text-center;
+}
+
+.block-image img {
+  @apply max-w-full h-auto mx-auto rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-md;
+}
+
+.block-image figcaption {
+  @apply text-sm text-zinc-500 mt-2;
+}
+
+.block-gallery {
+  @apply my-8 grid gap-4;
+}
+
+.gallery-item img {
+  @apply w-full rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm transition-transform duration-300 hover:scale-102;
+}
+
+.block-video, .block-map {
+  @apply my-8 max-w-4xl mx-auto;
+}
+
+.video-wrapper, .map-wrapper {
+  @apply relative rounded-2xl overflow-hidden border border-zinc-200/50 dark:border-zinc-800/50 shadow-md bg-zinc-100 dark:bg-zinc-900;
+}
+
+.faq-item {
+  @apply border border-zinc-200 dark:border-zinc-800 rounded-xl mb-4 bg-zinc-50 dark:bg-zinc-900/30 overflow-hidden transition-colors hover:border-zinc-300 dark:hover:border-zinc-700;
+}
+
+.faq-question {
+  @apply p-4 font-title font-semibold text-lg text-zinc-900 dark:text-white cursor-pointer list-none flex justify-between items-center;
+}
+
+.faq-question::after {
+  content: "+";
+  @apply text-xl text-zinc-400 transition-transform duration-200;
+}
+
+details[open] .faq-question::after {
+  @apply rotate-45;
+}
+
+.faq-answer {
+  @apply px-4 pb-4 text-zinc-600 dark:text-zinc-400 text-[15px];
+}

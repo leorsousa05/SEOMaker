@@ -32,7 +32,7 @@ assertTrue(strpos($schema, '"@type":"BreadcrumbList"') !== false, 'breadcrumb is
 assertTrue(strpos($schema, '"position":1') !== false, 'first item position 1');
 assertTrue(strpos($schema, '"position":2') !== false, 'second item position 2');
 assertTrue(strpos($schema, 'https://example.com/') !== false, 'homepage url in breadcrumb');
-assertTrue(strpos($schema, 'https://example.com/page/sobre') !== false, 'page url in breadcrumb');
+assertTrue(strpos($schema, 'https://example.com/sobre') !== false, 'page url in breadcrumb');
 
 // Homepage has only 1 item
 $home = new Page();

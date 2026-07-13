@@ -19,7 +19,7 @@ class SitemapGenerator
         $pages = Database::fetchAll('SELECT slug, updated_at FROM pages WHERE is_active = 1 ORDER BY id');
         
         foreach ($pages as $page) {
-            $loc = $page['slug'] === '' ? $siteUrl . '/' : $siteUrl . '/page/' . $page['slug'];
+            $loc = $page['slug'] === '' ? $siteUrl . '/' : $siteUrl . '/' . $page['slug'];
             $lastmod = !empty($page['updated_at']) ? date('Y-m-d', strtotime($page['updated_at'])) : date('Y-m-d');
             
             $xml .= "  <url>\n";

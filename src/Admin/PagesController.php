@@ -36,6 +36,7 @@ class PagesController
         AuthController::requireAuth();
         
         $id = isset($params['id']) ? (int) $params['id'] : 0;
+        $isEdit = $id > 0;
         $page = $id > 0 ? Database::fetchOne('SELECT * FROM pages WHERE id = ?', [$id]) : null;
         
         $schemaTypes = SchemaFormBuilder::types();
@@ -123,7 +124,23 @@ class PagesController
         if ($contentBlocks) {
             $blocks = json_decode($contentBlocks, true);
             if (is_array($blocks)) {
-                $contentHtml = BlockEditor::render($blocks);
+                // Pass consolidated address to BlockEditor::render
+                $address = null;
+                if (isset($_POST['address_street']) && $_POST['address_street'] !== '') {
+                    $address = Address::fromArray([
+                        'street' => $_POST['address_street'] ?? '',
+                        'number' => $_POST['address_number'] ?? '',
+                        'complement' => $_POST['address_complement'] ?? '',
+                        'neighborhood' => $_POST['address_neighborhood'] ?? '',
+                        'city' => $_POST['address_city'] ?? '',
+                        'state' => $_POST['address_state'] ?? '',
+                        'zip' => $_POST['address_zip'] ?? '',
+                        'country' => $_POST['address_country'] ?? 'Brasil',
+                        'lat' => $_POST['address_lat'] ?? null,
+                        'lng' => $_POST['address_lng'] ?? null,
+                    ]);
+                }
+                $contentHtml = BlockEditor::render($blocks, $address ? $address->fullAddress() : '');
             }
         }
         
@@ -137,6 +154,7 @@ class PagesController
             'schema_type' => $schemaType,
             'schema_data' => $schemaData,
             'is_active' => isset($_POST['is_active']) ? 1 : 0,
+            'in_menu' => isset($_POST['in_menu']) ? 1 : 0,
             'updated_at' => date('Y-m-d H:i:s'),
         ];
         

@@ -37,7 +37,7 @@ $page->meta_description = 'Descrição sobre';
 
 $meta = SeoManager::metaTags($page);
 
-assertTrue(strpos($meta, '<link rel="canonical" href="https://example.com/page/sobre">') !== false, 'canonical tag contains absolute url');
+assertTrue(strpos($meta, '<link rel="canonical" href="https://example.com/sobre">') !== false, 'canonical tag contains absolute url');
 assertTrue(strpos($meta, '<meta name="twitter:card" content="summary_large_image">') !== false, 'twitter card is present');
 assertTrue(strpos($meta, '<meta name="twitter:title" content="Sobre">') !== false, 'twitter title is present');
 assertTrue(strpos($meta, '<meta name="twitter:image" content="https://example.com/uploads/og.png">') !== false, 'twitter image uses og_image');

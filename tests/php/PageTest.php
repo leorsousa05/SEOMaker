@@ -57,4 +57,38 @@ if ($existing) {
     assertTrue(empty($errors), 'same id excluded from duplicate check');
 }
 
+// Test in_menu property and mapping
+$p = new Page();
+assertTrue($p->in_menu === false, 'in_menu defaults to false');
+
+$p2 = Page::fromArray(['title' => 'Menu Page', 'in_menu' => true]);
+assertTrue($p2->in_menu === true, 'fromArray maps in_menu true');
+
+$p3 = Page::fromArray(['title' => 'Non Menu Page', 'in_menu' => 0]);
+assertTrue($p3->in_menu === false, 'fromArray maps in_menu false/0');
+
+$arr = $p2->toArray();
+assertEquals(1, $arr['in_menu'], 'toArray maps in_menu to 1');
+
+$arr2 = $p3->toArray();
+assertEquals(0, $arr2['in_menu'], 'toArray maps in_menu to 0');
+
+// Test saving to DB and fetching
+$testSlug = 'in-menu-test-' . uniqid();
+Database::insert('pages', [
+    'slug' => $testSlug,
+    'title' => 'Menu DB Test',
+    'in_menu' => 1,
+    'is_active' => 1,
+    'created_at' => date('Y-m-d H:i:s'),
+]);
+
+$fetched = Database::fetchOne("SELECT * FROM pages WHERE slug = ?", [$testSlug]);
+assertTrue($fetched !== false, 'fetched test page');
+$pageObj = Page::fromArray($fetched);
+assertTrue($pageObj->in_menu === true, 'fetched page has in_menu true');
+
+// Clean up
+Database::delete('pages', "slug = ?", [$testSlug]);
+
 echo "\nAll Page tests passed.\n";

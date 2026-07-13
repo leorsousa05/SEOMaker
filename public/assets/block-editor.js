@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    var editor, blocks = [], hiddenInput;
+    var editor, blocks = [], hiddenInput, mediaCache = {};
 
     function initBlockEditor(container) {
         editor = container;
@@ -13,6 +13,21 @@
         } catch (e) {
             blocks = [{type: 'text', content: '<p>Comece a editar...</p>'}];
         }
+
+        // Fetch media list to populate mediaCache for previews
+        fetch('/admin/media/json?perPage=100')
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.success && data.items) {
+                    data.items.forEach(function (item) {
+                        mediaCache[item.id] = item.path;
+                    });
+                }
+                renderBlocks();
+            })
+            .catch(function () {
+                // Ignore error, fallback will handle it
+            });
 
         renderEditor();
         renderBlocks();
@@ -185,21 +200,84 @@
                 var idx = parseInt(btn.dataset.index);
                 openMediaModal(function (url) {
                     blocks[idx].src = url;
-                    var input = editor.querySelector('.be-image-src[data-index="' + idx + '"]');
-                    if (input) input.value = url;
+                    blocks[idx].media_id = 0; // reset media_id since we are assigning src url
+                    renderBlocks();
                     syncHiddenInput();
-                });
+                }, false);
+            });
+        });
+
+        // Image source input change listener
+        container.querySelectorAll('.be-image-src').forEach(function (input) {
+            input.addEventListener('change', function () {
+                renderBlocks();
+            });
+        });
+
+        // Gallery choose button
+        container.querySelectorAll('.be-gallery-choose').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var idx = parseInt(btn.dataset.index);
+                openMediaModal(function (items) {
+                    var ids = [];
+                    var mediaItems = [];
+                    items.forEach(function (item) {
+                        ids.push(item.id);
+                        mediaItems.push(item);
+                        mediaCache[item.id] = item.path;
+                    });
+                    blocks[idx].media_ids = ids;
+                    blocks[idx].media_items = mediaItems;
+                    renderBlocks();
+                    syncHiddenInput();
+                }, true);
+            });
+        });
+
+        // Remove image from gallery block
+        container.querySelectorAll('.be-gallery-remove-img').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var idx = parseInt(btn.dataset.index);
+                var idToRemove = parseInt(btn.dataset.id);
+                if (blocks[idx] && blocks[idx].media_ids) {
+                    blocks[idx].media_ids = blocks[idx].media_ids.filter(function (id) {
+                        return id !== idToRemove;
+                    });
+                    if (blocks[idx].media_items) {
+                        blocks[idx].media_items = blocks[idx].media_items.filter(function (item) {
+                            return item.id !== idToRemove;
+                        });
+                    }
+                    renderBlocks();
+                    syncHiddenInput();
+                }
+            });
+        });
+
+        // Checkbox inputs (Lazy Loading)
+        container.querySelectorAll('.be-checkbox').forEach(function (checkbox) {
+            checkbox.addEventListener('change', function () {
+                var idx = parseInt(checkbox.dataset.index);
+                var prop = checkbox.dataset.prop;
+                blocks[idx][prop] = checkbox.checked;
+                syncHiddenInput();
             });
         });
     }
 
-    function openMediaModal(callback) {
+    function openMediaModal(callback, allowMultiple) {
         var overlay = document.getElementById('media-modal-overlay');
         var grid = document.getElementById('media-modal-grid');
         if (!overlay || !grid) {
             // Fallback: simple prompt
             var url = prompt('URL da imagem:');
-            if (url) callback(url);
+            if (url) {
+                if (allowMultiple) {
+                    callback([{ id: 0, path: url }]);
+                } else {
+                    callback(url);
+                }
+            }
             return;
         }
 
@@ -215,25 +293,41 @@
                 }
                 var html = '';
                 data.items.forEach(function (item) {
-                    html += '<div class="media-modal-item" data-url="' + escapeHtml(item.path) + '">';
+                    html += '<div class="media-modal-item" data-id="' + item.id + '" data-url="' + escapeHtml(item.path) + '">';
                     html += '<img src="' + escapeHtml(item.path) + '" alt="" loading="lazy">';
                     html += '<div class="media-modal-select">✓</div>';
                     html += '</div>';
                 });
                 grid.innerHTML = html;
 
-                var selectedUrl = null;
                 grid.querySelectorAll('.media-modal-item').forEach(function (item) {
                     item.addEventListener('click', function () {
-                        grid.querySelectorAll('.media-modal-item').forEach(function (i) { i.classList.remove('selected'); });
-                        item.classList.add('selected');
-                        selectedUrl = item.dataset.url;
+                        if (allowMultiple) {
+                            item.classList.toggle('selected');
+                        } else {
+                            grid.querySelectorAll('.media-modal-item').forEach(function (i) { i.classList.remove('selected'); });
+                            item.classList.add('selected');
+                        }
                     });
                 });
 
                 document.getElementById('media-modal-confirm').onclick = function () {
                     overlay.style.display = 'none';
-                    if (selectedUrl) callback(selectedUrl);
+                    if (allowMultiple) {
+                        var selectedItems = [];
+                        grid.querySelectorAll('.media-modal-item.selected').forEach(function (el) {
+                            selectedItems.push({
+                                id: parseInt(el.dataset.id),
+                                path: el.dataset.url
+                            });
+                        });
+                        callback(selectedItems);
+                    } else {
+                        var selectedEl = grid.querySelector('.media-modal-item.selected');
+                        if (selectedEl) {
+                            callback(selectedEl.dataset.url);
+                        }
+                    }
                 };
             })
             .catch(function () {
@@ -274,8 +368,21 @@
                 html += '</div>';
                 break;
             case 'image':
+                var imgSrc = block.src || '';
+                if (!imgSrc && block.media_id && mediaCache[block.media_id]) {
+                    imgSrc = mediaCache[block.media_id];
+                }
+                if (imgSrc) {
+                    html += '<div class="be-image-preview" style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px; border: 1px solid #ccc; padding: 5px; border-radius: 4px;">';
+                    html += '<img src="' + escapeHtml(imgSrc) + '" style="max-height: 80px; max-width: 80px; object-fit: cover; border-radius: 4px;">';
+                    html += '<div style="word-break: break-all;">';
+                    html += '<div style="font-weight: bold; font-size: 0.85rem;">' + escapeHtml(imgSrc.split('/').pop()) + '</div>';
+                    html += '<div style="font-size: 0.75rem; color: #666;">' + escapeHtml(imgSrc) + '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                }
                 html += '<div class="be-image-row">';
-                html += '<input type="text" class="be-input be-image-src" data-index="' + i + '" data-prop="src" value="' + escapeHtml(block.src || '') + '" placeholder="URL da imagem">';
+                html += '<input type="text" class="be-input be-image-src" data-index="' + i + '" data-prop="src" value="' + escapeHtml(imgSrc) + '" placeholder="URL da imagem">';
                 html += '<button type="button" class="be-btn be-image-gallery" data-index="' + i + '">📁 Galeria</button>';
                 html += '</div>';
                 html += '<input type="text" class="be-input" data-index="' + i + '" data-prop="alt" value="' + escapeHtml(block.alt || '') + '" placeholder="Descrição da imagem (alt)">';
@@ -285,17 +392,52 @@
                 html += '<option value="center"' + (block.align === 'center' ? ' selected' : '') + '>Centro</option>';
                 html += '<option value="right"' + (block.align === 'right' ? ' selected' : '') + '>Direita</option>';
                 html += '</select>';
+                var imageLazyChecked = (block.lazy !== false) ? ' checked' : '';
+                html += '<div style="margin-top: 5px;"><label><input type="checkbox" class="be-checkbox" data-index="' + i + '" data-prop="lazy"' + imageLazyChecked + '> Lazy Loading</label></div>';
                 break;
             case 'gallery':
-                html += '<input type="text" class="be-input" data-index="' + i + '" data-prop="media_ids" value="' + escapeHtml((block.media_ids || []).join(',')) + '" placeholder="IDs das imagens separados por vírgula">';
-                html += '<input type="number" class="be-input" data-index="' + i + '" data-prop="columns" value="' + (block.columns || 3) + '" placeholder="Colunas (1-6)">';
+                html += '<div class="be-gallery-preview" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-bottom: 10px;">';
+                var ids = block.media_ids || [];
+                ids.forEach(function (id) {
+                    var path = '';
+                    if (mediaCache[id]) {
+                        path = mediaCache[id];
+                    } else if (block.media_items) {
+                        var found = block.media_items.find(function(item) { return item.id == id; });
+                        if (found) path = found.path;
+                    }
+                    
+                    if (path) {
+                        html += '<div class="be-gallery-preview-item" style="position: relative; width: 80px; height: 80px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden;">';
+                        html += '<img src="' + escapeHtml(path) + '" style="width: 100%; height: 100%; object-fit: cover;">';
+                        html += '<button type="button" class="be-gallery-remove-img" data-index="' + i + '" data-id="' + id + '" style="position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 18px; height: 18px; line-height: 14px; font-size: 12px; cursor: pointer; text-align: center; padding: 0;">&times;</button>';
+                        html += '</div>';
+                    } else {
+                        html += '<div class="be-gallery-preview-item" style="position: relative; width: 80px; height: 80px; border: 1px dashed #ccc; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #999;">';
+                        html += 'ID: ' + id;
+                        html += '<button type="button" class="be-gallery-remove-img" data-index="' + i + '" data-id="' + id + '" style="position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 18px; height: 18px; line-height: 14px; font-size: 12px; cursor: pointer; text-align: center; padding: 0;">&times;</button>';
+                        html += '</div>';
+                    }
+                });
+                html += '</div>';
+                
+                html += '<button type="button" class="be-btn be-gallery-choose" data-index="' + i + '" style="margin-bottom: 10px;">📁 Escolher Imagens</button>';
+                html += '<div style="margin-bottom: 5px;">';
+                html += '<label>Colunas: <input type="number" class="be-input be-gallery-columns" data-index="' + i + '" data-prop="columns" value="' + (block.columns || 3) + '" min="1" max="6" style="width: 80px; display: inline-block; margin-left: 5px;"></label>';
+                html += '</div>';
+                var galleryLazyChecked = (block.lazy !== false) ? ' checked' : '';
+                html += '<div><label><input type="checkbox" class="be-checkbox" data-index="' + i + '" data-prop="lazy"' + galleryLazyChecked + '> Lazy Loading</label></div>';
                 break;
             case 'video':
                 html += '<input type="text" class="be-input" data-index="' + i + '" data-prop="url" value="' + escapeHtml(block.url || '') + '" placeholder="URL do YouTube ou Vimeo">';
+                var videoLazyChecked = (block.lazy !== false) ? ' checked' : '';
+                html += '<div style="margin-top: 5px;"><label><input type="checkbox" class="be-checkbox" data-index="' + i + '" data-prop="lazy"' + videoLazyChecked + '> Lazy Loading</label></div>';
                 break;
             case 'map':
                 html += '<input type="number" class="be-input" data-index="' + i + '" data-prop="zoom" value="' + (block.zoom || 15) + '" placeholder="Zoom (1-20)">';
                 html += '<p class="help-text">O mapa usa o endereço cadastrado na aba "Endereço".</p>';
+                var mapLazyChecked = (block.lazy !== false) ? ' checked' : '';
+                html += '<div style="margin-top: 5px;"><label><input type="checkbox" class="be-checkbox" data-index="' + i + '" data-prop="lazy"' + mapLazyChecked + '> Lazy Loading</label></div>';
                 break;
             case 'cta':
                 html += '<input type="text" class="be-input" data-index="' + i + '" data-prop="text" value="' + escapeHtml(block.text || '') + '" placeholder="Texto do botão">';

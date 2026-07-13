@@ -84,6 +84,11 @@ foreach ($schemaTypes as $type) {
                         <input type="checkbox" id="is_active" name="is_active" value="1" <?= ($page['is_active'] ?? 1) ? 'checked' : '' ?>>
                         <label for="is_active">Página visível no site</label>
                     </div>
+                    
+                    <div class="form-group form-check">
+                        <input type="checkbox" id="in_menu" name="in_menu" value="1" <?= ($page['in_menu'] ?? 0) ? 'checked' : '' ?>>
+                        <label for="in_menu">Mostrar no menu</label>
+                    </div>
                 </div>
             </div>
         </div>

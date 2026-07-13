@@ -63,7 +63,7 @@
                         </td>
                         <td style="text-align: right; white-space: nowrap;">
                             <div style="display: inline-flex; gap: 0.25rem; justify-content: flex-end;">
-                                <a href="/page/<?= htmlspecialchars($page['slug']) ?>" target="_blank" class="btn btn-sm btn-ghost" title="Ver no site">Ver</a>
+                                <a href="/<?= htmlspecialchars($page['slug']) ?>" target="_blank" class="btn btn-sm btn-ghost" title="Ver no site">Ver</a>
                                 <a href="/admin/pages/edit/<?= (int) $page['id'] ?>" class="btn btn-sm btn-ghost" title="Editar">Editar</a>
                                 <a href="/admin/pages/delete/<?= (int) $page['id'] ?>" class="btn btn-sm btn-danger" title="Excluir" onclick="return confirm('Tem certeza que deseja excluir esta página?')">Excluir</a>
                             </div>

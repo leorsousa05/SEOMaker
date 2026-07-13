@@ -6,44 +6,44 @@
 
 :root {
     /* Backgrounds */
-    --bg-body: #fff;
-    --bg-sidebar: #fafafa;
-    --bg-header: #fff;
-    --bg-card: #fff;
-    --bg-input: #fff;
-    --bg-muted: #fafafa;
-    --bg-hover: #f5f5f5;
+    --bg-body: hsl(0 0% 100%);
+    --bg-sidebar: hsl(240 5% 98%);
+    --bg-header: hsl(0 0% 100%);
+    --bg-card: hsl(0 0% 100%);
+    --bg-input: hsl(240 5% 98%);
+    --bg-muted: hsl(240 5% 98%);
+    --bg-hover: hsl(240 5% 94%);
     --bg-overlay: rgba(0, 0, 0, 0.4);
 
     /* Borders */
-    --border: #eaeaea;
-    --border-light: #f0f0f0;
-    --border-focus: #000;
-    --border-input: #e5e5e5;
+    --border: hsl(240 6% 90%);
+    --border-light: hsl(240 6% 94%);
+    --border-focus: hsl(262 83% 58%);
+    --border-input: hsl(240 6% 85%);
 
     /* Text */
-    --text-primary: #000;
-    --text-secondary: #666;
-    --text-muted: #888;
+    --text-primary: hsl(240 10% 4%);
+    --text-secondary: hsl(240 5% 35%);
+    --text-muted: hsl(240 5% 55%);
     --text-on-primary: #fff;
 
     /* Accents */
-    --accent: #000;
-    --accent-hover: #333;
-    --accent-blue: #0070f3;
-    --accent-blue-hover: #005cc5;
-    --accent-red: #e00;
-    --accent-red-hover: #c00;
+    --accent: hsl(262 83% 58%);
+    --accent-hover: hsl(262 83% 52%);
+    --accent-blue: hsl(221.2 83.2% 53.3%);
+    --accent-blue-hover: hsl(221.2 83.2% 45%);
+    --accent-red: hsl(0 84.2% 60.2%);
+    --accent-red-hover: hsl(0 84.2% 50%);
     --accent-amber: #f5a623;
 
     /* Layout */
     --sidebar-width: 240px;
     --header-height: 64px;
-    --radius: 8px;
-    --radius-lg: 12px;
+    --radius: 10px;
+    --radius-lg: 16px;
     --shadow: 0 0 0 1px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.03);
     --shadow-lg: 0 0 0 1px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.06);
-    --shadow-focus: 0 0 0 2px rgba(0,0,0,0.1);
+    --shadow-focus: 0 0 0 2px rgba(124, 58, 237, 0.15);
 
     /* Transitions */
     --transition: 150ms ease;
@@ -92,7 +92,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
+    color: var(--text-on-primary);
     font-weight: 700;
     font-size: 1.125rem;
     margin: 0 auto 1.5rem;
@@ -157,7 +157,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
+    color: var(--text-on-primary);
     font-weight: 700;
     font-size: 0.875rem;
 }
@@ -208,11 +208,14 @@ body {
 .sidebar-nav a:hover svg { opacity: 1; }
 
 .sidebar-nav a.active {
-    color: var(--text-primary);
+    color: var(--accent);
     background: var(--bg-hover);
 }
 
-.sidebar-nav a.active svg { opacity: 1; }
+.sidebar-nav a.active svg {
+    color: var(--accent);
+    opacity: 1;
+}
 
 .sidebar-nav a.logout {
     margin-top: auto;
@@ -1436,35 +1439,35 @@ body {
    ============================================ */
 
 html[data-theme="dark"] {
-    --bg-body: #000;
-    --bg-sidebar: #0a0a0a;
-    --bg-header: #000;
-    --bg-card: #111;
-    --bg-input: #111;
-    --bg-muted: #0a0a0a;
-    --bg-hover: #1a1a1a;
+    --bg-body: hsl(240 10% 3.9%);
+    --bg-sidebar: hsl(240 10% 6%);
+    --bg-header: hsl(240 10% 3.9%);
+    --bg-card: hsl(240 10% 10%);
+    --bg-input: hsl(240 10% 6%);
+    --bg-muted: hsl(240 10% 6%);
+    --bg-hover: hsl(240 10% 14%);
     --bg-overlay: rgba(0, 0, 0, 0.7);
 
-    --border: #333;
-    --border-light: #222;
-    --border-focus: #fff;
-    --border-input: #333;
+    --border: hsl(240 6% 15%);
+    --border-light: hsl(240 6% 12%);
+    --border-focus: hsl(262 83% 62%);
+    --border-input: hsl(240 6% 20%);
 
-    --text-primary: #fff;
-    --text-secondary: #a1a1a1;
-    --text-muted: #666;
-    --text-on-primary: #000;
+    --text-primary: hsl(0 0% 98%);
+    --text-secondary: hsl(240 5% 65%);
+    --text-muted: hsl(240 5% 45%);
+    --text-on-primary: #fff;
 
-    --accent: #fff;
-    --accent-hover: #ccc;
-    --accent-blue: #3291ff;
-    --accent-blue-hover: #0070f3;
-    --accent-red: #ff4444;
-    --accent-red-hover: #ff5555;
+    --accent: hsl(262 83% 62%);
+    --accent-hover: hsl(262 83% 68%);
+    --accent-blue: hsl(217.2 91.2% 59.8%);
+    --accent-blue-hover: hsl(217.2 91.2% 50%);
+    --accent-red: hsl(0 84.2% 60.2%);
+    --accent-red-hover: hsl(0 84.2% 50%);
 
     --shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 2px 4px rgba(0,0,0,0.4);
     --shadow-lg: 0 0 0 1px rgba(255,255,255,0.06), 0 4px 16px rgba(0,0,0,0.6);
-    --shadow-focus: 0 0 0 2px rgba(255,255,255,0.15);
+    --shadow-focus: 0 0 0 2px rgba(124, 58, 237, 0.25);
 }
 
 html[data-theme="dark"] .be-block,

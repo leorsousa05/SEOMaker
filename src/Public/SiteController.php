@@ -47,6 +47,13 @@ class SiteController
         echo View::render('public/page', ['page' => $page]);
     }
     
+    public function redirectToSlug(array $params): void
+    {
+        $slug = $params['slug'] ?? '';
+        header('Location: /' . $slug, true, 301);
+        exit;
+    }
+    
     public function sitemap(): void
     {
         header('Content-Type: application/xml; charset=utf-8');

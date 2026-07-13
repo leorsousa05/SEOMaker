@@ -14,7 +14,7 @@ class SeoManager
         $siteTitle = Config::get('site_title', 'Site');
         $siteDesc = Config::get('site_description', '');
         $siteUrl = rtrim(Config::get('site_url', 'https://example.com'), '/');
-        $canonical = $siteUrl . ($page->slug === '' ? '/' : '/page/' . $page->slug);
+        $canonical = $siteUrl . ($page->slug === '' ? '/' : '/' . $page->slug);
         
         $title = $page->meta_title ?: $page->title;
         $fullTitle = $title ? $title . ' | ' . $siteTitle : $siteTitle;
@@ -77,7 +77,7 @@ class SeoManager
                 '@type' => 'ListItem',
                 'position' => 2,
                 'name' => $page->title ?: $page->meta_title,
-                'item' => $siteUrl . '/page/' . $page->slug,
+                'item' => $siteUrl . '/' . $page->slug,
             ];
         }
         

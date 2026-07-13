@@ -3,7 +3,7 @@
 ## ADDED
 
 ### Content\BlockEditor
-- `render(array $blocks): string` — converte blocos JSON → HTML
+- `render(array $blocks, string $fallbackAddress = ''): string` — converte blocos JSON → HTML com fallback de endereço de mapa
 - `sanitizeHtml(string $html): string` — remove script, onclick, etc.
 - `defaultBlocks(): array` — blocos iniciais para nova página
 
@@ -17,28 +17,28 @@ Render: `<div class="block-text">$content</div>`
 
 #### image
 ```json
-{"type": "image", "media_id": 5, "alt": "...", "caption": "...", "align": "center"}
+{"type": "image", "media_id": 5, "alt": "...", "caption": "...", "align": "center", "lazy": true}
 ```
-Render: `<figure class="block-image block-image--center"><img src="/uploads/..." alt="..."><figcaption>...</figcaption></figure>`
+Render: `<figure class="block-image block-image--center"><img src="/uploads/..." alt="..." loading="lazy"><figcaption>...</figcaption></figure>`
 
 #### gallery
 ```json
-{"type": "gallery", "media_ids": [1,2,3], "columns": 3, "gap": "medium"}
+{"type": "gallery", "media_ids": [1,2,3], "columns": 3, "gap": "medium", "lazy": true}
 ```
 Render: `<div class="block-gallery block-gallery--3">...grid...</div>`
 
 #### video
 ```json
-{"type": "video", "url": "https://youtube.com/watch?v=XXX", "provider": "youtube"}
+{"type": "video", "url": "https://youtube.com/watch?v=XXX", "provider": "youtube", "lazy": true}
 ```
-Render: `<div class="block-video"><iframe src="https://youtube.com/embed/XXX"></iframe></div>`
+Render: `<div class="block-video"><iframe src="https://youtube.com/embed/XXX" loading="lazy"></iframe></div>`
 Extrai video ID de YouTube/Vimeo URLs.
 
 #### map
 ```json
-{"type": "map", "address_id": 1, "zoom": 15}
+{"type": "map", "address_id": 1, "zoom": 15, "lazy": true}
 ```
-Render: `<iframe src="https://maps.google.com/maps?q=ADDRESS&t=&z=15&ie=UTF8&iwloc=&output=embed"></iframe>`
+Render: `<iframe src="https://maps.google.com/maps?q=ADDRESS&t=&z=15&ie=UTF8&iwloc=&output=embed" loading="lazy"></iframe>`
 
 #### cta
 ```json
@@ -62,10 +62,10 @@ Render: `<div style="height: 40px"></div>`
 - Renderiza toolbar de blocos (+ Adicionar bloco)
 - Cada bloco: toolbar própria (mover, duplicar, deletar)
 - Texto: contenteditable com toolbar flutuante
-- Imagem: abre galeria modal para selecionar
-- Galeria: multi-select de imagens
-- Vídeo: input de URL com preview
-- Mapa: vincula ao address_id da página
+- Imagem: abre galeria modal para selecionar, exibe preview da miniatura e toggle de Lazy Loading
+- Galeria: multi-select interativo de imagens com grid de miniaturas com exclusão direta e toggle de Lazy Loading
+- Vídeo: input de URL com preview e toggle de Lazy Loading
+- Mapa: vincula ao endereço da página, suportando fallback dinâmico no renderizador e toggle de Lazy Loading
 - CTA: inputs de texto, URL, select de estilo
 - FAQ: lista dinâmica de Q&A
 - Spacer: slider de altura

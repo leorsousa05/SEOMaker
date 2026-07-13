@@ -20,7 +20,7 @@ class SchemaGenerator
         $schema = [
             '@context' => 'https://schema.org',
             '@type' => $page->schema_type,
-            'url' => $siteUrl . ($page->slug === '' ? '/' : '/page/' . $page->slug),
+            'url' => $siteUrl . ($page->slug === '' ? '/' : '/' . $page->slug),
             'name' => $page->meta_title ?: $page->title,
         ];
         

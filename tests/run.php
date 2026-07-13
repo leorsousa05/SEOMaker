@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../src/autoload.php';
+\App\Core\Seeder::run();
+
 echo "=== PHP Tests ===\n";
 require __DIR__ . '/php/SettingsControllerTest.php';
 echo "\n";
@@ -24,6 +27,9 @@ echo "\n";
 require __DIR__ . '/php/BreadcrumbSchemaTest.php';
 echo "\n";
 require __DIR__ . '/php/RedirectTest.php';
+echo "\n";
+require __DIR__ . '/php/MediaManagerTest.php';
+
 
 echo "\n=== JS Tests ===\n";
 if (shell_exec('which node')) {

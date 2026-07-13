@@ -4,7 +4,7 @@
 
 ### Core\Router
 - Map HTTP methods to handlers
-- Parse URL params (/page/{slug})
+- Parse URL params (/{slug})
 - Call handler with params array
 - 404/405 handlers
 

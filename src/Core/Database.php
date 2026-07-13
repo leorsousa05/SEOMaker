@@ -14,7 +14,11 @@ class Database
     public static function getInstance(): PDO
     {
         if (self::$instance === null) {
-            $dbPath = __DIR__ . '/../../config/database.sqlite';
+            $dbDir = __DIR__ . '/../../config';
+            if (!is_dir($dbDir)) {
+                mkdir($dbDir, 0755, true);
+            }
+            $dbPath = $dbDir . '/database.sqlite';
             self::$instance = new PDO('sqlite:' . $dbPath);
             self::$instance->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             self::$instance->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);

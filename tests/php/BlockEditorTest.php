@@ -75,4 +75,69 @@ $default = BlockEditor::defaultBlocks();
 assertBlock(count($default) === 1, 'defaultBlocks returns 1 block');
 assertBlock($default[0]['type'] === 'text', 'defaultBlocks first is text');
 
+// Test: lazy loading default (true/not set) for image block
+$blocks = [['type' => 'image', 'src' => '/test.jpg']];
+$html = BlockEditor::render($blocks);
+assertBlock(str_contains($html, 'loading="lazy"'), 'image block has loading="lazy" by default');
+
+// Test: lazy loading disabled (lazy = false) for image block
+$blocks = [['type' => 'image', 'src' => '/test.jpg', 'lazy' => false]];
+$html = BlockEditor::render($blocks);
+assertBlock(!str_contains($html, 'loading="lazy"'), 'image block does not have loading="lazy" when lazy is false');
+
+// Test: lazy loading default (true/not set) for video block
+$blocks = [['type' => 'video', 'url' => 'https://youtube.com/watch?v=abc123']];
+$html = BlockEditor::render($blocks);
+assertBlock(str_contains($html, 'loading="lazy"'), 'video block has loading="lazy" by default');
+
+// Test: lazy loading disabled (lazy = false) for video block
+$blocks = [['type' => 'video', 'url' => 'https://youtube.com/watch?v=abc123', 'lazy' => false]];
+$html = BlockEditor::render($blocks);
+assertBlock(!str_contains($html, 'loading="lazy"'), 'video block does not have loading="lazy" when lazy is false');
+
+// Test: map block fallback address rendering when address_id is 0 / address not found
+$blocks = [['type' => 'map', 'address_id' => 0, 'zoom' => 12]];
+$html = BlockEditor::render($blocks, 'Rua Teste, 123, São Paulo');
+assertBlock(str_contains($html, 'maps.google.com/maps?q=Rua+Teste%2C+123%2C+S%C3%A3o+Paulo'), 'map fallback address is rendered in maps URL');
+assertBlock(str_contains($html, 'loading="lazy"'), 'map fallback block has loading="lazy" by default');
+
+// Test: map block fallback address lazy loading disabled
+$blocks = [['type' => 'map', 'address_id' => 0, 'zoom' => 12, 'lazy' => false]];
+$html = BlockEditor::render($blocks, 'Rua Teste, 123, São Paulo');
+assertBlock(!str_contains($html, 'loading="lazy"'), 'map fallback block does not have loading="lazy" when lazy is false');
+
+// Test: map block empty fallback returns empty string
+$blocks = [['type' => 'map', 'address_id' => 0, 'zoom' => 12]];
+$html = BlockEditor::render($blocks, '');
+assertBlock($html === '', 'map block with no address and empty fallback returns empty string');
+
+// Test: gallery block rendering and lazy loading
+use App\Core\Database;
+use App\Core\Seeder;
+Seeder::run();
+$mediaId = Database::insert('media', [
+    'filename' => 'test_gallery.jpg',
+    'original_name' => 'test_gallery.jpg',
+    'mime_type' => 'image/jpeg',
+    'size_bytes' => 100,
+    'path' => '/uploads/test_gallery.jpg',
+    'created_at' => date('Y-m-d H:i:s'),
+]);
+
+try {
+    // Gallery block lazy default
+    $blocks = [['type' => 'gallery', 'media_ids' => [$mediaId], 'columns' => 3]];
+    $html = BlockEditor::render($blocks);
+    assertBlock(str_contains($html, 'loading="lazy"'), 'gallery block has loading="lazy" by default');
+    assertBlock(str_contains($html, 'src="/uploads/test_gallery.jpg"'), 'gallery block renders media path');
+
+    // Gallery block lazy false
+    $blocks = [['type' => 'gallery', 'media_ids' => [$mediaId], 'columns' => 3, 'lazy' => false]];
+    $html = BlockEditor::render($blocks);
+    assertBlock(!str_contains($html, 'loading="lazy"'), 'gallery block does not have loading="lazy" when lazy is false');
+} finally {
+    // Clean up
+    Database::delete('media', 'id = ?', [$mediaId]);
+}
+
 echo "\nAll BlockEditor tests passed.\n";

@@ -12,11 +12,11 @@ class BlockEditor
     /**
      * @param array<int, array<string, mixed>> $blocks
      */
-    public static function render(array $blocks): string
+    public static function render(array $blocks, string $fallbackAddress = ''): string
     {
         $html = '';
         foreach ($blocks as $block) {
-            $html .= self::renderBlock($block);
+            $html .= self::renderBlock($block, $fallbackAddress);
         }
         return $html;
     }
@@ -24,7 +24,7 @@ class BlockEditor
     /**
      * @param array<string, mixed> $block
      */
-    public static function renderBlock(array $block): string
+    public static function renderBlock(array $block, string $fallbackAddress = ''): string
     {
         $type = $block['type'] ?? 'text';
         
@@ -33,7 +33,7 @@ class BlockEditor
             'image' => self::renderImage($block),
             'gallery' => self::renderGallery($block),
             'video' => self::renderVideo($block),
-            'map' => self::renderMap($block),
+            'map' => self::renderMap($block, $fallbackAddress),
             'cta' => self::renderCta($block),
             'faq' => self::renderFaq($block),
             'spacer' => self::renderSpacer($block),
@@ -76,8 +76,9 @@ class BlockEditor
             return '';
         }
         
+        $lazyAttr = (!isset($block['lazy']) || $block['lazy'] !== false) ? ' loading="lazy"' : '';
         $html = '<figure class="block block-image block-image--' . $align . '">';
-        $html .= '<img src="' . self::e($path) . '" alt="' . $alt . '" loading="lazy">';
+        $html .= '<img src="' . self::e($path) . '" alt="' . $alt . '"' . $lazyAttr . '>';
         if ($caption) {
             $html .= '<figcaption>' . $caption . '</figcaption>';
         }
@@ -98,6 +99,7 @@ class BlockEditor
             return '';
         }
         
+        $lazyAttr = (!isset($block['lazy']) || $block['lazy'] !== false) ? ' loading="lazy"' : '';
         $html = '<div class="block block-gallery block-gallery--' . $columns . '">';
         
         $placeholders = implode(',', array_fill(0, count($mediaIds), '?'));
@@ -105,7 +107,7 @@ class BlockEditor
         
         foreach ($mediaItems as $item) {
             $html .= '<div class="gallery-item">';
-            $html .= '<img src="' . self::e($item['path']) . '" alt="' . self::e($item['original_name']) . '" loading="lazy">';
+            $html .= '<img src="' . self::e($item['path']) . '" alt="' . self::e($item['original_name']) . '"' . $lazyAttr . '>';
             $html .= '</div>';
         }
         
@@ -126,13 +128,14 @@ class BlockEditor
             return '';
         }
         
-        return '<div class="block block-video"><div class="video-wrapper"><iframe src="' . self::e($embedUrl) . '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div></div>';
+        $lazyAttr = (!isset($block['lazy']) || $block['lazy'] !== false) ? ' loading="lazy"' : '';
+        return '<div class="block block-video"><div class="video-wrapper"><iframe src="' . self::e($embedUrl) . '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen' . $lazyAttr . '></iframe></div></div>';
     }
     
     /**
      * @param array<string, mixed> $block
      */
-    private static function renderMap(array $block): string
+    private static function renderMap(array $block, string $fallbackAddress = ''): string
     {
         $addressId = $block['address_id'] ?? 0;
         $zoom = (int) ($block['zoom'] ?? 15);
@@ -142,22 +145,27 @@ class BlockEditor
             $address = Database::fetchOne('SELECT * FROM addresses WHERE id = ?', [$addressId]);
         }
         
-        if (!$address) {
+        if ($address) {
+            $addrStr = implode(', ', array_filter([
+                $address['street'],
+                $address['number'],
+                $address['city'],
+                $address['state'],
+                $address['zip'],
+                $address['country'],
+            ]));
+        } else {
+            $addrStr = $fallbackAddress;
+        }
+        
+        if (empty($addrStr)) {
             return '';
         }
         
-        $addrStr = implode(', ', array_filter([
-            $address['street'],
-            $address['number'],
-            $address['city'],
-            $address['state'],
-            $address['zip'],
-            $address['country'],
-        ]));
-        
         $embedUrl = 'https://maps.google.com/maps?q=' . urlencode($addrStr) . '&t=&z=' . $zoom . '&ie=UTF8&iwloc=&output=embed';
+        $lazyAttr = (!isset($block['lazy']) || $block['lazy'] !== false) ? ' loading="lazy"' : '';
         
-        return '<div class="block block-map"><div class="map-wrapper"><iframe src="' . self::e($embedUrl) . '" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe></div></div>';
+        return '<div class="block block-map"><div class="map-wrapper"><iframe src="' . self::e($embedUrl) . '" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"' . $lazyAttr . '></iframe></div></div>';
     }
     
     /**
