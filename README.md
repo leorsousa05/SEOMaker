@@ -8,7 +8,7 @@
   <img src="https://img.shields.io/badge/PHP-%3E%3D8.0-111111?style=flat-square" alt="PHP 8.0 or higher">
   <img src="https://img.shields.io/badge/database-SQLite-111111?style=flat-square" alt="SQLite database">
   <img src="https://img.shields.io/badge/framework-none-111111?style=flat-square" alt="No framework">
-  <img src="https://img.shields.io/badge/license-unspecified-111111?style=flat-square" alt="License unspecified">
+  <img src="https://img.shields.io/badge/license-Proprietary-111111?style=flat-square" alt="Proprietary license">
 </p>
 
 SEOMaker is a small, self-contained CMS and landing-page template for building SEO-optimized websites. It ships with an admin panel, a visual block editor, and a full SEO engine — meta tags, Schema.org JSON-LD, sitemap, robots.txt, and redirects — all in plain PHP with zero framework dependencies and a single SQLite file as the database.
@@ -156,4 +156,4 @@ Every feature starts as a change spec and is merged into `living/` on completion
 
 ## License
 
-Not specified. No `LICENSE` file is included in this repository — all rights reserved by the author until one is added.
+[Proprietary](LICENSE) — All Rights Reserved. Copyright (c) 2026 Leonardo Ribeiro De Sousa. The owner retains full rights, including commercial use. No permission is granted to third parties to use, copy, modify, or distribute this software without prior written consent.
