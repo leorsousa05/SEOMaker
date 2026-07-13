@@ -16,6 +16,7 @@ class Product
     public float   $price            = 0.0;
     public ?float  $promo_price      = null;
     public ?int    $image_id         = null;
+    public ?string $image_path       = null;
     public string  $gallery_ids      = '[]';
     public string  $category         = '';
     public string  $tags             = '';
@@ -42,6 +43,8 @@ class Product
         $p->promo_price      = isset($data['promo_price']) && $data['promo_price'] !== '' && $data['promo_price'] !== null
                                 ? (float) $data['promo_price'] : null;
         $p->image_id         = isset($data['image_id']) && $data['image_id'] !== '' ? (int) $data['image_id'] : null;
+        $p->image_path       = isset($data['image_path']) && $data['image_path'] !== ''
+                                ? (string) $data['image_path'] : null;
         $p->gallery_ids      = (string) ($data['gallery_ids'] ?? '[]');
         $p->category         = (string) ($data['category'] ?? '');
         $p->tags             = (string) ($data['tags'] ?? '');
@@ -80,6 +83,53 @@ class Product
             'created_at'        => $this->created_at,
             'updated_at'        => $this->updated_at,
         ];
+    }
+
+    public function hasPromoPrice(): bool
+    {
+        return $this->promo_price !== null
+            && $this->promo_price > 0
+            && $this->promo_price < $this->price;
+    }
+
+    public function getOriginalPrice(): float
+    {
+        return $this->price;
+    }
+
+    public function getDisplayedPrice(): float
+    {
+        return $this->hasPromoPrice() ? (float) $this->promo_price : $this->price;
+    }
+
+    public function getDiscountPercent(): ?int
+    {
+        if (!$this->hasPromoPrice() || $this->price <= 0) {
+            return null;
+        }
+
+        $percent = (int) round((1 - ((float) $this->promo_price / $this->price)) * 100);
+
+        return $percent > 0 ? $percent : null;
+    }
+
+    public function hasExternalLink(): bool
+    {
+        return trim($this->external_link) !== '';
+    }
+
+    public function getPublicUrl(): string
+    {
+        if ($this->hasExternalLink()) {
+            return trim($this->external_link);
+        }
+
+        return '/produtos/' . $this->slug;
+    }
+
+    public function getCardCtaLabel(): string
+    {
+        return $this->hasExternalLink() ? 'Ver Oferta' : 'Saiba Mais';
     }
 
     public static function generateSlug(string $name): string

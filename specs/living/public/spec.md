@@ -19,3 +19,8 @@
 - Valida nome, email, mensagem
 - Envia email para contact_email configurado
 - Retorna redirect com flash message
+
+### Product Rendering
+- Página inicial pode listar produtos em destaque no bloco público.
+- Página de produto renderiza detalhes, galeria e produtos relacionados.
+- Cartões de produto usam o mesmo contrato visual e de CTA na home e nas recomendações.

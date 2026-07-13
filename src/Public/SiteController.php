@@ -22,11 +22,13 @@ class SiteController
         $page = $pageData ? Page::fromArray($pageData) : new Page();
         
         $features = $this->getLandingFeatures();
+        $featuredProducts = $this->loadFeaturedProducts();
         
         View::layout('public/layout');
         echo View::render('public/home', [
-            'page' => $page,
-            'features' => $features,
+            'page'             => $page,
+            'features'         => $features,
+            'featuredProducts'  => $featuredProducts,
         ]);
     }
     
@@ -51,45 +53,28 @@ class SiteController
     public function product(array $params): void
     {
         $slug = $params['slug'] ?? '';
-        $productData = Database::fetchOne(
-            'SELECT p.*, m.path AS image_path FROM products p LEFT JOIN media m ON p.image_id = m.id WHERE p.slug = ? AND p.is_active = 1',
-            [$slug]
-        );
+        $product = $this->loadProductBySlug($slug);
 
-        if (!$productData) {
+        if ($product === null) {
             http_response_code(404);
             View::layout('public/layout');
             echo View::render('public/404');
             return;
         }
-
-        $product = Product::fromArray($productData);
-
-        // Fetch gallery images
-        $galleryImages = [];
-        if (!empty($productData['gallery_ids'])) {
-            $ids = json_decode($productData['gallery_ids'], true);
-            if (is_array($ids) && !empty($ids)) {
-                $placeholders = implode(',', array_fill(0, count($ids), '?'));
-                $galleryImages = Database::fetchAll("SELECT id, path FROM media WHERE id IN ($placeholders)", $ids);
-            }
-        }
-
-        // Related products (same category, excluding current)
-        $related = [];
-        if (!empty($product->category)) {
-            $related = Database::fetchAll(
-                'SELECT p.*, m.path AS image_path FROM products p LEFT JOIN media m ON p.image_id = m.id WHERE p.category = ? AND p.slug != ? AND p.is_active = 1 ORDER BY p.id DESC LIMIT 4',
-                [$product->category, $slug]
-            );
-        }
+        
+        $galleryImages = $this->loadProductGalleryImages(
+            $this->loadProductGalleryIds($product->gallery_ids)
+        );
+        $relatedProducts = !empty($product->category)
+            ? $this->loadRelatedProducts($product->category, $slug)
+            : [];
 
         View::layout('public/layout');
         echo View::render('public/product', [
-            'product'       => $product,
-            'imagePath'     => $productData['image_path'] ?? null,
-            'galleryImages' => $galleryImages,
-            'related'       => $related,
+            'product'         => $product,
+            'imagePath'       => $product->image_path,
+            'galleryImages'   => $galleryImages,
+            'relatedProducts' => $relatedProducts,
         ]);
     }
 
@@ -187,5 +172,83 @@ class SiteController
             ['icon' => '🎯', 'title' => 'Focado', 'desc' => 'Estrutura semântica perfeita.'],
             ['icon' => '📊', 'title' => 'Completo', 'desc' => 'Schema.org, sitemap e meta tags.'],
         ];
+    }
+
+    /**
+     * @return array<int, Product>
+     */
+    private function loadFeaturedProducts(int $limit = 12): array
+    {
+        $rows = Database::fetchAll(
+            'SELECT p.*, m.path AS image_path FROM products p LEFT JOIN media m ON p.image_id = m.id WHERE p.featured = 1 AND p.is_active = 1 ORDER BY p.id DESC LIMIT ?',
+            [$limit]
+        );
+
+        return array_map(
+            static fn (array $row): Product => Product::fromArray($row),
+            $rows
+        );
+    }
+
+    private function loadProductBySlug(string $slug): ?Product
+    {
+        $productData = Database::fetchOne(
+            'SELECT p.*, m.path AS image_path FROM products p LEFT JOIN media m ON p.image_id = m.id WHERE p.slug = ? AND p.is_active = 1',
+            [$slug]
+        );
+
+        if ($productData === false) {
+            return null;
+        }
+
+        return Product::fromArray($productData);
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    private function loadProductGalleryIds(string $galleryIdsJson): array
+    {
+        if ($galleryIdsJson === '') {
+            return [];
+        }
+
+        $decoded = json_decode($galleryIdsJson, true);
+        if (!is_array($decoded)) {
+            return [];
+        }
+
+        return array_values(array_filter(array_map('intval', $decoded), static fn (int $id): bool => $id > 0));
+    }
+
+    /**
+     * @param array<int, int> $ids
+     * @return array<int, array<string, mixed>>
+     */
+    private function loadProductGalleryImages(array $ids): array
+    {
+        if (empty($ids)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+
+        return Database::fetchAll("SELECT id, path FROM media WHERE id IN ($placeholders)", $ids);
+    }
+
+    /**
+     * @return array<int, Product>
+     */
+    private function loadRelatedProducts(string $category, string $excludeSlug, int $limit = 4): array
+    {
+        $rows = Database::fetchAll(
+            'SELECT p.*, m.path AS image_path FROM products p LEFT JOIN media m ON p.image_id = m.id WHERE p.category = ? AND p.slug != ? AND p.is_active = 1 ORDER BY p.id DESC LIMIT ?',
+            [$category, $excludeSlug, $limit]
+        );
+
+        return array_map(
+            static fn (array $row): Product => Product::fromArray($row),
+            $rows
+        );
     }
 }

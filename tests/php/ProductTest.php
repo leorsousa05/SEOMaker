@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../../src/autoload.php';
 
 use App\Core\Seeder;
+use App\Core\View;
 use App\Models\Product;
 
 if (!function_exists('assertTrue')) {
@@ -39,6 +40,7 @@ $data = [
     'price'             => '199.90',
     'promo_price'       => '149.90',
     'image_id'          => 3,
+    'image_path'        => '/uploads/tenis.jpg',
     'gallery_ids'       => '[1,2,3]',
     'category'          => 'Calçados',
     'tags'              => 'esporte,corrida',
@@ -57,6 +59,7 @@ assertTrue($product->name === 'Tênis Esportivo', 'fromArray: preserves name');
 assertTrue($product->price === 199.90, 'fromArray: casts price to float');
 assertTrue($product->promo_price === 149.90, 'fromArray: casts promo_price to float');
 assertTrue($product->image_id === 3, 'fromArray: casts image_id to int');
+assertTrue($product->image_path === '/uploads/tenis.jpg', 'fromArray: preserves image_path for view rendering');
 assertTrue($product->stock === 10, 'fromArray: casts stock to int');
 assertTrue($product->featured === true, 'fromArray: casts featured to bool');
 assertTrue($product->is_active === true, 'fromArray: casts is_active to bool');
@@ -66,6 +69,52 @@ $arr = $product->toArray();
 assertTrue($arr['featured'] === 1, 'toArray: bool featured becomes 1');
 assertTrue($arr['is_active'] === 1, 'toArray: bool is_active becomes 1');
 assertTrue($arr['price'] === 199.90, 'toArray: price preserved as float');
+
+assertTrue($product->hasPromoPrice() === true, 'hasPromoPrice: returns true when promo is valid');
+assertTrue($product->getOriginalPrice() === 199.90, 'getOriginalPrice: returns base price');
+assertTrue($product->getDisplayedPrice() === 149.90, 'getDisplayedPrice: returns promo price when available');
+assertTrue($product->getDiscountPercent() === 25, 'getDiscountPercent: calculates expected percentage');
+assertTrue($product->hasExternalLink() === true, 'hasExternalLink: detects external URL');
+assertTrue($product->getPublicUrl() === 'https://loja.com/tenis', 'getPublicUrl: returns external URL when present');
+assertTrue($product->getCardCtaLabel() === 'Ver Oferta', 'getCardCtaLabel: external link label');
+
+$plainProduct = Product::fromArray([
+    'name' => 'Produto Simples',
+    'slug' => 'produto-simples',
+    'price' => '80.00',
+    'promo_price' => '',
+    'external_link' => '',
+]);
+
+assertTrue($plainProduct->hasPromoPrice() === false, 'hasPromoPrice: returns false without valid promo');
+assertTrue($plainProduct->getDisplayedPrice() === 80.0, 'getDisplayedPrice: returns base price without promo');
+assertTrue($plainProduct->getDiscountPercent() === null, 'getDiscountPercent: null without promo');
+assertTrue($plainProduct->hasExternalLink() === false, 'hasExternalLink: false for internal product');
+assertTrue($plainProduct->getPublicUrl() === '/produtos/produto-simples', 'getPublicUrl: internal product URL');
+assertTrue($plainProduct->getCardCtaLabel() === 'Saiba Mais', 'getCardCtaLabel: internal product label');
+
+// ── render partial: shared product card ───────────────────────────────────────
+$featuredCard = View::partial('public/_product_card', [
+    'product' => $product,
+]);
+
+assertTrue(strpos($featuredCard, 'href="https://loja.com/tenis"') !== false, 'partial: renders external product url');
+assertTrue(strpos($featuredCard, 'target="_blank"') !== false, 'partial: external product opens in new tab');
+assertTrue(strpos($featuredCard, 'rel="noopener noreferrer"') !== false, 'partial: external product uses safe rel');
+assertTrue(strpos($featuredCard, 'Ver Oferta') !== false, 'partial: external product CTA label');
+assertTrue(strpos($featuredCard, '-25%') !== false, 'partial: promo badge shows discount');
+assertTrue(strpos($featuredCard, 'Leve e confortável') !== false, 'partial: full card renders description');
+
+$compactCard = View::partial('public/_product_card', [
+    'product' => $plainProduct,
+    'compact' => true,
+]);
+
+assertTrue(strpos($compactCard, 'href="/produtos/produto-simples"') !== false, 'partial: internal product url');
+assertTrue(strpos($compactCard, 'target="_blank"') === false, 'partial: internal product does not open new tab');
+assertTrue(strpos($compactCard, 'Saiba Mais') !== false, 'partial: internal product CTA label');
+assertTrue(strpos($compactCard, 'Produto Simples') !== false, 'partial: compact card renders product name');
+assertTrue(strpos($compactCard, 'Leve e confortável') === false, 'partial: compact card omits description');
 
 // ── validate: valid data ──────────────────────────────────────────────────────
 $errors = Product::validate(['name' => 'Produto X', 'price' => '50.00', 'promo_price' => '', 'slug' => '']);

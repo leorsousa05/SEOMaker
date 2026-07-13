@@ -3,11 +3,13 @@
  * @var App\Models\Product $product
  * @var string|null $imagePath
  * @var array<int, array<string, mixed>> $galleryImages
- * @var array<int, array<string, mixed>> $related
+ * @var array<int, App\Models\Product> $relatedProducts
  */
 
-$hasPromo   = $product->promo_price !== null && $product->promo_price > 0;
-$finalPrice = $hasPromo ? $product->promo_price : $product->price;
+$hasPromo   = $product->hasPromoPrice();
+$finalPrice = $product->getDisplayedPrice();
+$originalPrice = $product->getOriginalPrice();
+$discountPercent = $product->getDiscountPercent();
 $tags       = $product->tags ? array_map('trim', explode(',', $product->tags)) : [];
 $allImages  = [];
 if ($imagePath) {
@@ -94,17 +96,14 @@ foreach ($galleryImages as $gi) {
                 <!-- Price -->
                 <div class="flex items-baseline gap-3 mb-6">
                     <?php if ($hasPromo): ?>
-                        <span class="text-xl text-zinc-400 line-through">R$ <?= number_format((float)$product->price, 2, ',', '.') ?></span>
+                        <span class="text-xl text-zinc-400 line-through">R$ <?= number_format($originalPrice, 2, ',', '.') ?></span>
                     <?php endif; ?>
                     <span class="text-4xl font-black <?= $hasPromo ? 'text-violet-600 dark:text-violet-400' : 'text-zinc-900 dark:text-white' ?>">
-                        R$ <?= number_format((float)$finalPrice, 2, ',', '.') ?>
+                        R$ <?= number_format($finalPrice, 2, ',', '.') ?>
                     </span>
-                    <?php if ($hasPromo): ?>
+                    <?php if ($discountPercent !== null): ?>
                         <span class="bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 text-xs font-bold px-2 py-1 rounded-full">
-                            <?php
-                                $pct = round((1 - (float)$product->promo_price / (float)$product->price) * 100);
-                                echo "-{$pct}%";
-                            ?>
+                            -<?= $discountPercent ?>%
                         </span>
                     <?php endif; ?>
                 </div>
@@ -119,7 +118,7 @@ foreach ($galleryImages as $gi) {
                             <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
                             Em estoque (<?= $product->stock ?> un.)
                         </span>
-                    <?php elseif ($product->stock === 0 && empty($product->external_link)): ?>
+                    <?php elseif ($product->stock === 0 && !$product->hasExternalLink()): ?>
                         <span class="flex items-center gap-1.5">
                             <span class="w-2 h-2 rounded-full bg-red-500 inline-block"></span>
                             Fora de estoque
@@ -129,9 +128,9 @@ foreach ($galleryImages as $gi) {
 
                 <!-- CTA -->
                 <div class="flex flex-col sm:flex-row gap-3 mb-8">
-                    <?php if (!empty($product->external_link)): ?>
+                    <?php if ($product->hasExternalLink()): ?>
                         <a
-                            href="<?= htmlspecialchars($product->external_link) ?>"
+                            href="<?= htmlspecialchars($product->getPublicUrl()) ?>"
                             target="_blank"
                             rel="noopener noreferrer"
                             class="flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-violet-600 hover:bg-violet-700 text-white font-bold text-base transition-all duration-200 shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50 hover:-translate-y-0.5"
@@ -180,37 +179,15 @@ foreach ($galleryImages as $gi) {
         <?php endif; ?>
 
         <!-- ── Related products ── -->
-        <?php if (!empty($related)): ?>
+        <?php if (!empty($relatedProducts)): ?>
         <div class="mt-20 border-t border-zinc-200/60 dark:border-zinc-800/60 pt-16">
             <h2 class="text-2xl font-bold text-zinc-900 dark:text-white mb-8">Produtos relacionados</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <?php foreach ($related as $rel): ?>
-                <?php
-                    $relHasPromo  = !empty($rel['promo_price']) && (float)$rel['promo_price'] > 0;
-                    $relPrice     = $relHasPromo ? (float)$rel['promo_price'] : (float)$rel['price'];
-                    $relUrl       = !empty($rel['external_link']) ? htmlspecialchars($rel['external_link']) : '/produtos/' . htmlspecialchars($rel['slug']);
-                    $relExternal  = !empty($rel['external_link']);
-                ?>
-                <a href="<?= $relUrl ?>" <?= $relExternal ? 'target="_blank" rel="noopener noreferrer"' : '' ?> class="group bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200/60 dark:border-zinc-800/60 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 block">
-                    <div class="aspect-square bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
-                        <?php if (!empty($rel['image_path'])): ?>
-                            <img src="<?= htmlspecialchars($rel['image_path']) ?>" alt="<?= htmlspecialchars($rel['name']) ?>" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                        <?php else: ?>
-                            <div class="w-full h-full flex items-center justify-center text-zinc-300 dark:text-zinc-700">
-                                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                    <div class="p-4">
-                        <h3 class="font-semibold text-zinc-900 dark:text-white text-sm leading-snug mb-2 line-clamp-2"><?= htmlspecialchars($rel['name']) ?></h3>
-                        <div class="flex items-baseline gap-2">
-                            <?php if ($relHasPromo): ?>
-                                <span class="text-xs text-zinc-400 line-through">R$ <?= number_format((float)$rel['price'], 2, ',', '.') ?></span>
-                            <?php endif; ?>
-                            <span class="font-bold <?= $relHasPromo ? 'text-violet-600 dark:text-violet-400' : 'text-zinc-900 dark:text-white' ?>">R$ <?= number_format($relPrice, 2, ',', '.') ?></span>
-                        </div>
-                    </div>
-                </a>
+                <?php foreach ($relatedProducts as $rel): ?>
+                    <?= \App\Core\View::partial('public/_product_card', [
+                        'product' => $rel,
+                        'compact' => true,
+                    ]) ?>
                 <?php endforeach; ?>
             </div>
         </div>
